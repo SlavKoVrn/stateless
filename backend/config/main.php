@@ -14,6 +14,7 @@ return [
     'modules' => [],
     'components' => [
         'request' => [
+            'baseUrl' => '/admin',
             'csrfParam' => '_csrf-backend',
         ],
         'user' => [
@@ -37,14 +38,28 @@ return [
         'errorHandler' => [
             'errorAction' => 'site/error',
         ],
-        /*
         'urlManager' => [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
             ],
         ],
-        */
     ],
     'params' => $params,
+    'as beforeRequest' => [
+        'class' => 'yii\filters\AccessControl',
+        'rules' => [
+            [
+                'allow' => true,
+                'actions' => ['login', 'error'],
+            ],
+            [
+                'allow' => true,
+                'roles' => ['@'],
+            ],
+        ],
+        'denyCallback' => function () {
+            return Yii::$app->response->redirect(['site/login']);
+        },
+    ],
 ];
