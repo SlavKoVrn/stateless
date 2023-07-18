@@ -106,8 +106,13 @@ class ProductController extends Controller
     {
         $model = $this->findModel($id);
 
-        if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+        if ($this->request->isPost) {
+            $post = $this->request->post();
+            if ($model->load($post) && $model->save()){
+                $tags = $post['Product']['tags'];
+                $model->tagsSave($tags);
+                return $this->redirect(['view', 'id' => $model->id]);
+            }
         }
 
         return $this->render('update', [

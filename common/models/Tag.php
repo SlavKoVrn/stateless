@@ -2,6 +2,8 @@
 
 namespace common\models;
 
+use yii\helpers\ArrayHelper;
+
 /**
  * This is the model class for table "tag".
  *
@@ -37,5 +39,10 @@ class Tag extends \yii\db\ActiveRecord
             'id' => 'Ид',
             'name' => 'Тэг',
         ];
+    }
+
+    public static function getAllArray()
+    {
+        return ArrayHelper::map(self::find()->all(),'id','name');
     }
 }

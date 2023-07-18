@@ -35,6 +35,18 @@ $this->params['breadcrumbs'][] = $this->title;
             'name',
             'slug',
             'description:ntext',
+            [
+                'attribute'=>'tags',
+                'format'=>'raw',
+                'value'=>function($model){
+                    $tags = $model->getSelectedTagsName();
+                    $table = '<table>';
+                    foreach ($tags as $tag){
+                        $table .= "<tr><td>$tag</td></tr>";
+                    }
+                    return $table.'</table>';
+                }
+            ]
         ],
     ]) ?>
 

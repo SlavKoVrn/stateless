@@ -44,6 +44,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute'=>'price',
                 'contentOptions' => ['style' => 'text-align:right;'],
             ],
+            [
+                'label'=>'Тэги',
+                'content'=>function($model){
+                    return implode(';',$model->getSelectedTagsName());
+                }
+            ],
             //'description:ntext',
             [
                 'class' => ActionColumn::className(),

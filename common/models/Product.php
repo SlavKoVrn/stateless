@@ -1,8 +1,9 @@
 <?php
 
 namespace common\models;
-
+use Yii;
 use yii\behaviors\SluggableBehavior;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "product".
@@ -16,6 +17,8 @@ use yii\behaviors\SluggableBehavior;
  */
 class Product extends \yii\db\ActiveRecord
 {
+    public $tags = [];
+
     /**
      * {@inheritdoc}
      */
@@ -33,6 +36,7 @@ class Product extends \yii\db\ActiveRecord
             [['category_id', 'price'], 'integer'],
             [['description'], 'string'],
             [['name', 'slug'], 'string', 'max' => 255],
+            ['tags', 'each', 'rule' => ['integer']],
         ];
     }
 
@@ -48,6 +52,7 @@ class Product extends \yii\db\ActiveRecord
             'name' => 'Товар',
             'slug' => 'Ссылка',
             'description' => 'Описание',
+            'tags' => 'Тэги',
         ];
     }
 
@@ -63,9 +68,63 @@ class Product extends \yii\db\ActiveRecord
         ];
     }
 
+    public function tagsSave($newTagIds)
+    {
+        $currentTagIds = $this->getSelectedTagsIds();
+        $toInsert = [];
+        foreach (array_filter(array_diff($newTagIds,$currentTagIds)) as $tag_id){
+            $toInsert[] = $tag_id;
+        }
+
+        $transaction = Yii::$app->db->beginTransaction();
+        try {
+            if ($toInsert){
+                foreach ($toInsert as $tag_id){
+                    $product_tag = new ProductTag;
+                    $product_tag->setAttributes([
+                        'product_id' => $this->id,
+                        'tag_id' => $tag_id,
+                    ]);
+                    $product_tag->save();
+                }
+            }
+            if ($toRemove = array_filter(array_diff($currentTagIds,$newTagIds))){
+                ProductTag::deleteAll([
+                    'product_id'=>$this->id,
+                    'tag_id'=>$toRemove
+                ]);
+            }
+            $transaction->commit();
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+        }
+    }
+
     public function getCategory()
     {
         return $this->hasOne(Category::class, ['id' => 'category_id']);
+    }
+
+    public function afterFind()
+    {
+        parent::afterFind();
+        $this->tags = $this->getSelectedTagsIds();
+    }
+
+    public function getSelectedTagsIds()
+    {
+        return ArrayHelper::map($this->selectedTags,'id','id');
+    }
+
+    public function getSelectedTagsName()
+    {
+        return ArrayHelper::map($this->selectedTags,'id','name');
+    }
+
+    public function getSelectedTags()
+    {
+        return $this->hasMany(Tag::class, ['id' => 'tag_id'])
+            ->viaTable(ProductTag::tableName(), ['product_id' => 'id']);
     }
 
 }
