@@ -80,5 +80,37 @@ AppAsset::register($this);
 
 <?php $this->endBody() ?>
 </body>
+<div id="overlay">
+    <img id="spinner" src="/img/loader.gif"/>
+</div>
+<?php
+$js = <<<JS
+    $(document).ajaxStart(function() {
+        $('#overlay').show();
+    });
+    $(document).ajaxStop(function() {
+        $('#overlay').hide();
+    });
+JS;
+$this->registerJs($js);
+?>
+<style>
+    #overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+        display: none;
+    }
+    #spinner {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+</style>
 </html>
 <?php $this->endPage();
