@@ -39,7 +39,11 @@ AppAsset::register($this);
     ];
     if (Yii::$app->user->isGuest) {
         $menuItems[] = ['label' => 'Login', 'url' => ['/site/login']];
-    }     
+    }else{
+        $menuItems[] = ['label' => 'Категории', 'url' => ['/category']];
+        $menuItems[] = ['label' => 'Тэги', 'url' => ['/tag']];
+        $menuItems[] = ['label' => 'Продукты', 'url' => ['/product']];
+    }
     echo Nav::widget([
         'options' => ['class' => 'navbar-nav me-auto mb-2 mb-md-0'],
         'items' => $menuItems,
@@ -78,4 +82,13 @@ AppAsset::register($this);
 <?php $this->endBody() ?>
 </body>
 </html>
+    <style>
+        ul.pagination > li {
+            padding:12px;
+        }
+        ul.pagination > li.active {
+            color:white;
+            background-color:lightgrey;
+        }
+    </style>
 <?php $this->endPage();
