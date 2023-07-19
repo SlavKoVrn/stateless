@@ -127,4 +127,16 @@ class Product extends \yii\db\ActiveRecord
             ->viaTable(ProductTag::tableName(), ['product_id' => 'id']);
     }
 
+    public function fields()
+    {
+        return [
+            'id',
+            'name',
+            'slug',
+            'price',
+            'description',
+            'category'=>'category',
+            'tags'=>'selectedTags',
+        ];
+    }
 }
