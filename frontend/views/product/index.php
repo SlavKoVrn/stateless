@@ -17,6 +17,9 @@ $js=<<<JS
     $.ajax({
         type:'get',
         url: '/api/product',
+        data:{
+            'page':2
+        },
         success: function (data) {
             $('#myTable').DataTable({
                 data:data,
