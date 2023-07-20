@@ -67,7 +67,12 @@ $js=<<<JS
                         'searching':false,
                         columns: [
                             { data: 'id' },
-                            { data: 'category.name' },
+                            { 
+                                data: 'category',
+                                'render':function(data,type,row){
+                                    return data.id+'. '+data.name;
+                                }
+                            },
                             { data: 'name' },
                             {
                                 data: 'tags',
