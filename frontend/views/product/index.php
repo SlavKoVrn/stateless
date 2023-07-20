@@ -47,8 +47,8 @@ use yii\widgets\ActiveForm;
 </style>
 <?php
 $js=<<<JS
-    $(document).on('click','#search_product',function(e){
-        e.preventDefault();
+    window.search = function(page){
+        window.searching = true;
         $.ajax({
             type:'get',
             url: '/api/product',
@@ -56,18 +56,22 @@ $js=<<<JS
                 's[name]':$('#product-name').val(),
                 's[category_id]':$('#product-category_id option:selected').val(),
                 's[tags]':$('#product-tags').val(),
+                'page':page
             },
             success: function(data, status, jqXHR) {
-                var current_page = jqXHR.getResponseHeader('x-pagination-current-page');
-                var page_count   = jqXHR.getResponseHeader('x-pagination-page-count');
-                var per_page     = jqXHR.getResponseHeader('x-pagination-per-page');
-                var total_count  = jqXHR.getResponseHeader('x-pagination-total-count');
-                $('.pagination').html('');
-                window.table(data,per_page,true);
+                var headers = jqXHR.getAllResponseHeaders();
+                console.log(headers);
+                window.linkPager(jqXHR);
+                var per_page = jqXHR.getResponseHeader('x-pagination-per-page');
+                window.table(data,per_page,false);
             },
             error: function () {
             },
         });
+    };
+    $(document).on('click','#search_product',function(e){
+        e.preventDefault();
+        window.search(1);
     });
     const detailRows = [];
     function description(data) {
@@ -75,7 +79,11 @@ $js=<<<JS
     }
     $(document).on('click','ul.pagination li',function(e){
         e.preventDefault();
-        window.pagination($(this).data('page'));
+        if (window.searching){
+            window.search($(this).data('page'));
+        }else{
+            window.pagination($(this).data('page'));
+        }
     });
     window.table = function(data,per_page,paging){
         if ( $.fn.dataTable.isDataTable( '#myTable' ) ) {
@@ -151,7 +159,25 @@ $js=<<<JS
             });
         }
     }
+    window.linkPager = function(jqXHR){
+        $('.pagination').html('');
+        var current_page = jqXHR.getResponseHeader('x-pagination-current-page');
+        var page_count   = jqXHR.getResponseHeader('x-pagination-page-count');
+        var per_page     = jqXHR.getResponseHeader('x-pagination-per-page');
+        var total_count  = jqXHR.getResponseHeader('x-pagination-total-count');
+        var paginationHtml = '';
+        for (var i = 1; i <= page_count; i++) {
+            if (i === Number(current_page)) {
+                paginationHtml += '<li class="active" data-page="' + i + '">';
+            } else {
+                paginationHtml += '<li data-page="' + i + '">';
+            }
+            paginationHtml += '<a href="/api/product?page=' + i + '">' + i + '</a></li>';
+        }
+        $('.pagination').html(paginationHtml);
+    }
     window.pagination = function(page){
+        window.searching = false;
         $.ajax({
             type:'get',
             url: '/api/product',
@@ -159,20 +185,8 @@ $js=<<<JS
                 'page':page
             },
             success: function(data, status, jqXHR) {
-                var current_page = jqXHR.getResponseHeader('x-pagination-current-page');
-                var page_count   = jqXHR.getResponseHeader('x-pagination-page-count');
-                var per_page     = jqXHR.getResponseHeader('x-pagination-per-page');
-                var total_count  = jqXHR.getResponseHeader('x-pagination-total-count');
-                var paginationHtml = '';
-                for (var i = 1; i <= page_count; i++) {
-                    if (i === Number(current_page)) {
-                        paginationHtml += '<li class="active" data-page="' + i + '">';
-                    } else {
-                        paginationHtml += '<li data-page="' + i + '">';
-                    }
-                    paginationHtml += '<a href="/api/product?page=' + i + '">' + i + '</a></li>';
-                }
-                $('.pagination').html(paginationHtml);
+                var per_page = jqXHR.getResponseHeader('x-pagination-per-page');
+                window.linkPager(jqXHR);
                 window.table(data,per_page,false);
             },
             error: function () {
