@@ -9,7 +9,7 @@
             <th>Ид</th>
             <th>Категория</th>
             <th>Название</th>
-            <th>Описание</th>
+            <th>Тэги</th>
         </tr>
     </thead>
 </table>
@@ -37,6 +37,7 @@ $js=<<<JS
                 'page':page
             },
             success: function(data, status, jqXHR) {
+                console.log(data);
                 var current_page = jqXHR.getResponseHeader('x-pagination-current-page');
                 var page_count   = jqXHR.getResponseHeader('x-pagination-page-count');
                 var per_page     = jqXHR.getResponseHeader('x-pagination-per-page');
@@ -64,7 +65,16 @@ $js=<<<JS
                             { data: 'id' },
                             { data: 'category.name' },
                             { data: 'name' },
-                            { data: 'description' },
+                            {
+                                data: 'tags',
+                                'render': function (data, type, row) {
+                                    let tags = '<table>';
+                                    data.forEach(function(tag){
+                                        tags+='<tr><td>'+tag.name+'</td></tr>';
+                                    });
+                                    return tags;
+                                }
+                            },
                         ]
                     });
                 }
