@@ -71,7 +71,7 @@ $js=<<<JS
                                 'render': function (data, type, row) {
                                     let tags = '<table>';
                                     data.forEach(function(tag){
-                                        tags+='<tr><td>'+tag.name+'</td></tr>';
+                                        tags+='<tr><td>'+tag.id+'. '+tag.name+'</td></tr>';
                                     });
                                     return tags;
                                 }
