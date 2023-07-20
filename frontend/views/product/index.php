@@ -6,6 +6,7 @@
 <table id="myTable" class="display">
     <thead>
         <tr>
+            <th></th>
             <th>Ид</th>
             <th>Категория</th>
             <th>Название</th>
@@ -29,6 +30,10 @@
 </style>
 <?php
 $js=<<<JS
+    const detailRows = [];
+    function description(data) {
+        return data.description;
+    }
     $(document).on('click','ul.pagination li',function(e){
         e.preventDefault();
         window.pagination($(this).data('page'));
@@ -41,7 +46,7 @@ $js=<<<JS
                 'page':page
             },
             success: function(data, status, jqXHR) {
-                console.log(data);
+                //console.log(data);
                 var current_page = jqXHR.getResponseHeader('x-pagination-current-page');
                 var page_count   = jqXHR.getResponseHeader('x-pagination-page-count');
                 var per_page     = jqXHR.getResponseHeader('x-pagination-per-page');
@@ -66,6 +71,12 @@ $js=<<<JS
                         'paging':false,
                         'searching':false,
                         columns: [
+                            {
+                                class: 'dt-control',
+                                orderable: false,
+                                data: null,
+                                defaultContent: ''
+                            },
                             { data: 'id' },
                             { 
                                 data: 'category',
@@ -87,6 +98,43 @@ $js=<<<JS
                             { data: 'price' },
                         ]
                     });
+                    
+                    $('#myTable').on('click', 'tbody td.dt-control', function () {
+                        let tr = event.target.closest('tr');
+                        let row = $('#myTable').DataTable().row(tr);
+                        let idx = detailRows.indexOf(tr.id);
+                     
+                        if (row.child.isShown()) {
+                            tr.classList.remove('details');
+                            row.child.hide();
+                     
+                            // Remove from the 'open' array
+                            detailRows.splice(idx, 1);
+                        }
+                        else {
+                            tr.classList.add('details');
+                            row.child(description(row.data())).show();
+                     
+                            // Add to the 'open' array
+                            if (idx === -1) {
+                                detailRows.push(tr.id);
+                            }
+                        }
+                    });
+                     
+                    // On each draw, loop over the `detailRows` array and show any child rows
+                    $('#myTable').on('draw', () => {
+                        detailRows.forEach((id, i) => {
+                            let el = document.querySelector('#' + id + ' td.dt-control');
+                     
+                            if (el) {
+                                el.dispatchEvent(new Event('click', { bubbles: true }));
+                            }
+                        });
+                    });
+                    
+                    
+                    
                 }
             },
             error: function () {
