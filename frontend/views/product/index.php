@@ -10,6 +10,7 @@
             <th>Категория</th>
             <th>Название</th>
             <th>Тэги</th>
+            <th>Цена</th>
         </tr>
     </thead>
 </table>
@@ -75,6 +76,7 @@ $js=<<<JS
                                     return tags;
                                 }
                             },
+                            { data: 'price' },
                         ]
                     });
                 }
