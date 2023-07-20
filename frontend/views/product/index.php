@@ -23,6 +23,9 @@
         color:white;
         background-color:lightgrey;
     }
+    table td {
+        vertical-align: top;
+    }
 </style>
 <?php
 $js=<<<JS
