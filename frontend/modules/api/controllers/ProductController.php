@@ -3,9 +3,8 @@
 namespace frontend\modules\api\controllers;
 
 use common\models\Product;
+use frontend\modules\api\models\ProductSearch;
 use Yii;
-use yii\data\ActiveDataProvider;
-use yii\web\Response;
 
 class ProductController extends \yii\rest\ActiveController
 {
@@ -13,29 +12,19 @@ class ProductController extends \yii\rest\ActiveController
 
     public function actions(){
         $actions = parent::actions();
-        unset($actions['index']);
+        unset($actions['create'],$actions['update'],$actions['delete']);
+        $actions['index']['prepareDataProvider'] = [$this,'prepareDataProvider'];
         return $actions;
     }
 
-    public function actionIndex(){
-
-        Yii::$app->response->format = Response::FORMAT_JSON;
-
+    public function prepareDataProvider()
+    {
         $requestParams = Yii::$app->getRequest()->getBodyParams();
         if (empty($requestParams)) {
             $requestParams = Yii::$app->getRequest()->getQueryParams();
         }
-
-        return Yii::createObject([
-            'class' => ActiveDataProvider::class,
-            'query' => Product::find(),
-            'pagination' => [
-                'params' => $requestParams,
-            ],
-            'sort' => [
-                'params' => $requestParams,
-            ],
-        ]);
-
+        $searchModel = new ProductSearch;
+        return $searchModel->search($requestParams);
     }
+
 }
