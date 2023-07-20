@@ -47,6 +47,30 @@ use yii\widgets\ActiveForm;
 </style>
 <?php
 $js=<<<JS
+    window.language = {
+        "decimal":        ".",
+        "emptyTable":     "не найдено",
+        "info":           "Показано _START_ до _END_ из _TOTAL_ записей",
+        "infoEmpty":      "не найдено",
+        "infoFiltered":   "(установлен филтр из _MAX_ записей)",
+        "infoPostFix":    "",
+        "thousands":      "'",
+        "lengthMenu":     "Видно _MENU_ записей",
+        "loadingRecords": "Загрузка...",
+        "processing":     "Загрузка...",
+        "search":         "Поиск:",
+        "zeroRecords":    "не найдено",
+        "paginate": {
+            "first":      "Первая",
+            "last":       "Крайняя",
+            "next":       "Следующая",
+            "previous":   "Предыдущая"
+        },
+        "aria": {
+            "sortAscending":  ": по возрастанию",
+            "sortDescending": ": по убыванию"
+        }
+    };
     window.search = function(page){
         window.searching = true;
         $.ajax({
@@ -95,6 +119,7 @@ $js=<<<JS
                 'pageLength': per_page,
                 'paging':paging,
                 'searching':false,
+                language: window.language,
                 columns: [
                     {
                         class: 'dt-control',
