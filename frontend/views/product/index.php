@@ -173,7 +173,7 @@ $js=<<<JS
                 scrollY: '100vh',
                 language: language,
                 info:false,
-                dom: '<"top"i>rt<"bottom"flp><"clear">',
+                dom: '<"top"if>rt<"bottom"lp><"clear">',
                 columns: [
                     {
                         class: 'dt-control',

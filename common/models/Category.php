@@ -59,8 +59,13 @@ class Category extends \yii\db\ActiveRecord
         ];
     }
 
+    public function getFullName()
+    {
+        return $this->id.'. '.$this->name;
+    }
+
     public static function getCategories()
     {
-        return ArrayHelper::map(self::find()->all(),'id','name');
+        return ArrayHelper::map(self::find()->all(),'id','fullName');
     }
 }
