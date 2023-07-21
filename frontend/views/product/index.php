@@ -121,6 +121,9 @@ $js=<<<JS
             pagination($(this).data('page'));
         }
     });
+    function inArray(value, array) {
+        return array.indexOf(String(value)) !== -1;
+    };
     table = function(data,per_page,paging){
         if ( $.fn.dataTable.isDataTable( '#myTable' ) ) {
             $('#myTable').DataTable().clear().draw();
@@ -145,7 +148,11 @@ $js=<<<JS
                     { 
                         data: 'category',
                         'render':function(data,type,row){
-                            return data.id+'. '+data.name;
+                            span = '<span>'
+                            if (inArray(data.id,$('#product-category_id').val())){
+                                span = '<span style="color:red">';
+                            }
+                            return span + data.id+'. '+data.name+'</span>';
                         }
                     },
                     {
@@ -159,7 +166,11 @@ $js=<<<JS
                         render: function (data, type, row) {
                             let tags = '<table>';
                             data.forEach(function(tag){
-                                tags+='<tr><td>'+tag.id+'. '+tag.name+'</td></tr>';
+                                td = '<td>';
+                                if (inArray(tag.id,$('#product-tags').val())){
+                                    td = '<td style="color:red">';
+                                }
+                                tags+='<tr>'+td+tag.id+'. '+tag.name+'</td></tr>';
                             });
                             return tags;
                         }
@@ -176,14 +187,12 @@ $js=<<<JS
                 if (row.child.isShown()) {
                     tr.classList.remove('details');
                     row.child.hide();
-             
                     // Remove from the 'open' array
                     detailRows.splice(idx, 1);
                 }
                 else {
                     tr.classList.add('details');
                     row.child(description(row.data())).show();
-             
                     // Add to the 'open' array
                     if (idx === -1) {
                         detailRows.push(tr.id);
@@ -195,7 +204,6 @@ $js=<<<JS
             $('#myTable').on('draw', () => {
                 detailRows.forEach((id, i) => {
                     let el = document.querySelector('#' + id + ' td.dt-control');
-             
                     if (el) {
                         el.dispatchEvent(new Event('click', { bubbles: true }));
                     }
