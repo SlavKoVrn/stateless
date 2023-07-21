@@ -11,6 +11,7 @@ use yii\widgets\ActiveForm;
 
 <?php $form = ActiveForm::begin(); ?>
 <?= $form->field($model, 'name') ?>
+<?= $form->field($model, 'description') ?>
 <?= $form->field($model, 'category_id')->dropDownList(array_merge([0=>''],Category::getCategories())) ?>
 <?= $form->field($model, 'tags')->dropDownList(Tag::getAllArray(),['multiple' => true]) ?>
 <div class="form-group">
@@ -42,7 +43,7 @@ use yii\widgets\ActiveForm;
         background-color:lightgrey;
     }
     table td {
-        vertical-align: top;
+        vertical-align: top !important;
     }
 </style>
 <?php
@@ -83,6 +84,7 @@ $js=<<<JS
             url: '/api/product',
             data:{
                 's[name]':$('#product-name').val(),
+                's[description]':$('#product-description').val(),
                 's[category_id]':$('#product-category_id option:selected').val(),
                 's[tags]':$('#product-tags').val(),
                 'page':page
@@ -111,7 +113,7 @@ $js=<<<JS
     });
     const detailRows = [];
     function description(data) {
-        return data.description;
+        return highlightSubstring(data.description,$('#product-description').val());
     }
     $(document).on('click','ul.pagination li',function(e){
         e.preventDefault();
