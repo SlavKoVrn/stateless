@@ -103,7 +103,7 @@ $js=<<<JS
             var total_count  = jqXHR.getResponseHeader('x-pagination-total-count');
             iziToast.success({
                 title: 'Найдено',
-                message: (current_page * per_page - per_page + 1) +' - '+ ((per_page > total_count)?total_count:current_page * per_page) + ' Всего: ' + total_count + ' записи',
+                message: (current_page * per_page - per_page + 1) +' - '+ (((current_page * per_page) > total_count)?total_count:current_page * per_page) + ' Всего: ' + total_count + ' записи',
                 timeout: 8000
             });
         }
