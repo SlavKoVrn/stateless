@@ -2,6 +2,7 @@
 
 use common\models\Category;
 use common\models\Tag;
+use common\widgets\IonRangeSliderWidget;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -15,6 +16,12 @@ use yii\widgets\ActiveForm;
 <?= $form->field($model, 'description') ?>
 <?= $form->field($model, 'category_id')->dropDownList(array_merge([0=>''],Category::getCategories())) ?>
 <?= $form->field($model, 'tags')->dropDownList(Tag::getAllArray(),['multiple' => true]) ?>
+<?= $form->field($model, 'price')->widget(IonRangeSliderWidget::class,[
+    'min' => $price_min,
+    'max' => $price_max,
+    'from' => $price_min,
+    'to' => $price_max,
+]) ?>
 <div class="form-group">
     <?= Html::submitButton('Поиск', ['id'=>'search_product','class' => 'btn btn-primary']) ?>
     <?= Html::resetButton('Сброс', ['id'=>'search_reset','class' => 'btn btn-outline-secondary']) ?>
@@ -80,8 +87,8 @@ $js=<<<JS
         }
     };
     info = function(data,jqXHR){
-        var headers = jqXHR.getAllResponseHeaders();
-        console.log(headers);
+        //var headers = jqXHR.getAllResponseHeaders();
+        //console.log(headers);
         var current_page = Number(jqXHR.getResponseHeader('x-pagination-current-page'));
         var page_count   = Number(jqXHR.getResponseHeader('x-pagination-page-count'));
         var per_page     = Number(jqXHR.getResponseHeader('x-pagination-per-page'));
@@ -111,6 +118,8 @@ $js=<<<JS
                 's[description]':$('#product-description').val(),
                 's[category_id]':$('#product-category_id option:selected').val(),
                 's[tags]':$('#product-tags').val(),
+                's[priceFrom]':window.ionslider_product_price.result.from,
+                's[priceTo]':window.ionslider_product_price.result.to,
                 'page':page
             },
             success: function(data, status, jqXHR) {

@@ -11,6 +11,9 @@ use yii\data\ActiveDataProvider;
  */
 class ProductSearch extends Product
 {
+    public $priceFrom;
+    public $priceTo;
+
     /**
      * {@inheritdoc}
      */
@@ -18,7 +21,7 @@ class ProductSearch extends Product
     {
         return [
             [['id', 'category_id', 'price'], 'integer'],
-            [['name', 'slug', 'description', 'tags'], 'safe'],
+            [['name', 'slug', 'description', 'tags', 'priceFrom', 'priceTo'], 'safe'],
         ];
     }
 
@@ -61,13 +64,14 @@ class ProductSearch extends Product
         // grid filtering conditions
         $query->andFilterWhere([
             Product::tableName().'.[[id]]' => $this->id,
-            Product::tableName().'.[[price]]' => $this->price,
         ]);
+
+        $query->andFilterWhere([ 'between',Product::tableName().'.[[price]]',
+            intval($this->priceFrom),intval($this->priceTo)]);
 
         $query->andFilterWhere(['like', Product::tableName().'.[[name]]', $this->name])
             ->andFilterWhere(['like', Product::tableName().'.[[description]]', $this->description]);
 
-        /*
         $sql = $query->createCommand()->rawSql;
         $sql = str_replace('FROM',"\nFROM",$sql);
         $sql = str_replace('AND', "\nAND",$sql);
@@ -77,7 +81,6 @@ class ProductSearch extends Product
         $sql = str_replace('GROUP',"\nGROUP",$sql);
         $sql = str_replace('ORDER',"\nORDER",$sql);
         $sql = str_replace('LIMIT',"\nLIMIT",$sql);
-        */
 
         return $dataProvider;
     }
