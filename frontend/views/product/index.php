@@ -127,7 +127,6 @@ $js=<<<JS
                 paging:paging,
                 searching:true,
                 scrollCollapse: true,
-                scrollX: '100vh',
                 scrollY: '100vh',
                 language: window.language,
                 columns: [
