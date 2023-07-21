@@ -150,7 +150,7 @@ $js=<<<JS
                 scrollY: '100vh',
                 language: language,
                 info:true,
-                //dom: '<"top"lf>rt<"bottom"pi><"clear">',
+                dom: '<"top"i>rt<"bottom"flp><"clear">',
                 columns: [
                     {
                         class: 'dt-control',
@@ -192,7 +192,6 @@ $js=<<<JS
                     { data: 'price' },
                 ]
             });
-            $('.dataTables_info').appendTo('#infotop');
             $('#myTable').on('click', 'tbody td.dt-control', function () {
                 let tr = event.target.closest('tr');
                 let row = $('#myTable').DataTable().row(tr);
