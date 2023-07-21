@@ -15,7 +15,7 @@ use yii\widgets\ActiveForm;
 <?= $form->field($model, 'tags')->dropDownList(Tag::getAllArray(),['multiple' => true]) ?>
 <div class="form-group">
     <?= Html::submitButton('Поиск', ['id'=>'search_product','class' => 'btn btn-primary']) ?>
-    <?= Html::resetButton('Сброс', ['class' => 'btn btn-outline-secondary']) ?>
+    <?= Html::resetButton('Сброс', ['id'=>'search_reset','class' => 'btn btn-outline-secondary']) ?>
 </div>
 <?php ActiveForm::end(); ?>
 
@@ -50,7 +50,7 @@ $js=<<<JS
     window.language = {
         "decimal":        ".",
         "emptyTable":     "не найдено",
-        "info":           "Показано _START_ до _END_ из _TOTAL_ записей",
+        "info":           "Показано _START_ - _END_ всего _TOTAL_ записей",
         "infoEmpty":      "не найдено",
         "infoFiltered":   "(установлен филтр из _MAX_ записей)",
         "infoPostFix":    "",
@@ -84,7 +84,7 @@ $js=<<<JS
             },
             success: function(data, status, jqXHR) {
                 var headers = jqXHR.getAllResponseHeaders();
-                console.log(headers);
+                //console.log(headers);
                 window.linkPager(jqXHR);
                 var per_page = jqXHR.getResponseHeader('x-pagination-per-page');
                 window.table(data,per_page,false);
@@ -96,6 +96,13 @@ $js=<<<JS
     $(document).on('click','#search_product',function(e){
         e.preventDefault();
         window.search(1);
+    });
+    $(document).on('click','#search_reset',function(e){
+        e.preventDefault();
+        $('#product-name').val('');
+        $('#product-category_id').val(0);
+        $('#product-tags').val(0);
+        window.pagination(1);
     });
     const detailRows = [];
     function description(data) {
@@ -191,15 +198,17 @@ $js=<<<JS
         var per_page     = jqXHR.getResponseHeader('x-pagination-per-page');
         var total_count  = jqXHR.getResponseHeader('x-pagination-total-count');
         var paginationHtml = '';
-        for (var i = 1; i <= page_count; i++) {
-            if (i === Number(current_page)) {
-                paginationHtml += '<li class="active" data-page="' + i + '">';
-            } else {
-                paginationHtml += '<li data-page="' + i + '">';
+        if (page_count > 1){
+            for (var i = 1; i <= page_count; i++) {
+                if (i === Number(current_page)) {
+                    paginationHtml += '<li class="active" data-page="' + i + '">';
+                } else {
+                    paginationHtml += '<li data-page="' + i + '">';
+                }
+                paginationHtml += '<a href="/api/product?page=' + i + '">' + i + '</a></li>';
             }
-            paginationHtml += '<a href="/api/product?page=' + i + '">' + i + '</a></li>';
+            $('.pagination').html(paginationHtml);
         }
-        $('.pagination').html(paginationHtml);
     }
     window.pagination = function(page){
         window.searching = false;

@@ -31,7 +31,7 @@ class ProductSearch extends Product
      */
     public function search($params)
     {
-        $query = Product::find();
+        $query = Product::find()->distinct();
 
         // add conditions that should always apply here
 
@@ -67,7 +67,17 @@ class ProductSearch extends Product
         $query->andFilterWhere(['like', Product::tableName().'.[[name]]', $this->name])
             ->andFilterWhere(['like', Product::tableName().'.[[description]]', $this->description]);
 
+        /*
         $sql = $query->createCommand()->rawSql;
+        $sql = str_replace('FROM',"\nFROM",$sql);
+        $sql = str_replace('AND', "\nAND",$sql);
+        $sql = str_replace('LEFT',"\nLEFT",$sql);
+        $sql = str_replace('INNER',"\nINNER",$sql);
+        $sql = str_replace('WHERE',"\nWHERE",$sql);
+        $sql = str_replace('GROUP',"\nGROUP",$sql);
+        $sql = str_replace('ORDER',"\nORDER",$sql);
+        $sql = str_replace('LIMIT',"\nLIMIT",$sql);
+        */
 
         return $dataProvider;
     }
