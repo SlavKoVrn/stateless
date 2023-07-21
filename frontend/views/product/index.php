@@ -79,6 +79,30 @@ $js=<<<JS
             "sortDescending": ": по убыванию"
         }
     };
+    info = function(data,jqXHR){
+        /*
+        var headers = jqXHR.getAllResponseHeaders();
+        console.log(headers);
+        */
+        var current_page = Number(jqXHR.getResponseHeader('x-pagination-current-page'));
+        var page_count   = Number(jqXHR.getResponseHeader('x-pagination-page-count'));
+        var per_page     = Number(jqXHR.getResponseHeader('x-pagination-per-page'));
+        var total_count  = Number(jqXHR.getResponseHeader('x-pagination-total-count'));
+        if (!data.length){
+            iziToast.error({
+                title: 'Не найдено',
+                message: 'измените параметры поиска',
+                timeout: 8000
+            });
+        }else{
+            var total_count  = jqXHR.getResponseHeader('x-pagination-total-count');
+            iziToast.success({
+                title: 'Найдено',
+                message: (current_page * per_page - per_page + 1) +' - '+ (current_page * per_page) + ' Всего: ' + total_count + ' записи',
+                timeout: 8000
+            });
+        }
+    };
     search = function(page){
         searching = true;
         $.ajax({
@@ -92,25 +116,10 @@ $js=<<<JS
                 'page':page
             },
             success: function(data, status, jqXHR) {
-                var headers = jqXHR.getAllResponseHeaders();
-                //console.log(headers);
                 linkPager(jqXHR);
                 var per_page = jqXHR.getResponseHeader('x-pagination-per-page');
                 table(data,per_page,false);
-                if (!data.length){
-                    iziToast.error({
-                        title: 'Не найдено',
-                        message: 'измените параметры поиска',
-                        timeout: 8000
-                    });
-                }else{
-                    var total_count  = jqXHR.getResponseHeader('x-pagination-total-count');
-                    iziToast.success({
-                        title: 'Найдено',
-                        message: total_count + ' записи',
-                        timeout: 8000
-                    });
-                }
+                info(data,jqXHR);
             },
             error: function () {
             },
@@ -263,11 +272,7 @@ $js=<<<JS
                 var total_count  = jqXHR.getResponseHeader('x-pagination-total-count');
                 linkPager(jqXHR);
                 table(data,per_page,false);
-                iziToast.success({
-                    title: 'Найдено',
-                    message: total_count + ' записи',
-                    timeout: 8000
-                });
+                info(data,jqXHR);
             },
             error: function () {
             },
