@@ -47,7 +47,12 @@ use yii\widgets\ActiveForm;
 </style>
 <?php
 $js=<<<JS
-    window.language = {
+    function highlightSubstring(search, glue) {
+        return search.replace(new RegExp(glue, 'gi'), (match) => {
+            return '<strong style="color:red">' + match + '</strong>';
+        });
+    }
+    language = {
         "decimal":        ".",
         "emptyTable":     "не найдено",
         "info":           "Показано _START_ - _END_ всего _TOTAL_ записей",
@@ -128,7 +133,7 @@ $js=<<<JS
                 searching:true,
                 scrollCollapse: true,
                 scrollY: '100vh',
-                language: window.language,
+                language: language,
                 columns: [
                     {
                         class: 'dt-control',
@@ -143,10 +148,15 @@ $js=<<<JS
                             return data.id+'. '+data.name;
                         }
                     },
-                    { data: 'name' },
+                    {
+                        data: 'name',
+                        render: function (data, type, row) {
+                            return highlightSubstring(data,$('#product-name').val());
+                        }
+                    },
                     {
                         data: 'tags',
-                        'render': function (data, type, row) {
+                        render: function (data, type, row) {
                             let tags = '<table>';
                             data.forEach(function(tag){
                                 tags+='<tr><td>'+tag.id+'. '+tag.name+'</td></tr>';
