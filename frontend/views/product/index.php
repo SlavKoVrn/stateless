@@ -80,10 +80,8 @@ $js=<<<JS
         }
     };
     info = function(data,jqXHR){
-        /*
         var headers = jqXHR.getAllResponseHeaders();
         console.log(headers);
-        */
         var current_page = Number(jqXHR.getResponseHeader('x-pagination-current-page'));
         var page_count   = Number(jqXHR.getResponseHeader('x-pagination-page-count'));
         var per_page     = Number(jqXHR.getResponseHeader('x-pagination-per-page'));
@@ -98,7 +96,7 @@ $js=<<<JS
             var total_count  = jqXHR.getResponseHeader('x-pagination-total-count');
             iziToast.success({
                 title: 'Найдено',
-                message: (current_page * per_page - per_page + 1) +' - '+ (current_page * per_page) + ' Всего: ' + total_count + ' записи',
+                message: (current_page * per_page - per_page + 1) +' - '+ ((per_page > total_count)?total_count:current_page * per_page) + ' Всего: ' + total_count + ' записи',
                 timeout: 8000
             });
         }
