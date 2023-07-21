@@ -103,6 +103,13 @@ $js=<<<JS
                         message: 'измените параметры поиска',
                         timeout: 8000
                     });
+                }else{
+                    var total_count  = jqXHR.getResponseHeader('x-pagination-total-count');
+                    iziToast.success({
+                        title: 'Найдено',
+                        message: total_count + ' записи',
+                        timeout: 8000
+                    });
                 }
             },
             error: function () {
@@ -149,7 +156,7 @@ $js=<<<JS
                 scrollCollapse: true,
                 scrollY: '100vh',
                 language: language,
-                info:true,
+                info:false,
                 dom: '<"top"i>rt<"bottom"flp><"clear">',
                 columns: [
                     {
@@ -253,8 +260,14 @@ $js=<<<JS
             },
             success: function(data, status, jqXHR) {
                 var per_page = jqXHR.getResponseHeader('x-pagination-per-page');
+                var total_count  = jqXHR.getResponseHeader('x-pagination-total-count');
                 linkPager(jqXHR);
                 table(data,per_page,false);
+                iziToast.success({
+                    title: 'Найдено',
+                    message: total_count + ' записи',
+                    timeout: 8000
+                });
             },
             error: function () {
             },
