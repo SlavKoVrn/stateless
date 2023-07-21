@@ -76,8 +76,8 @@ $js=<<<JS
             "sortDescending": ": по убыванию"
         }
     };
-    window.search = function(page){
-        window.searching = true;
+    search = function(page){
+        searching = true;
         $.ajax({
             type:'get',
             url: '/api/product',
@@ -90,9 +90,9 @@ $js=<<<JS
             success: function(data, status, jqXHR) {
                 var headers = jqXHR.getAllResponseHeaders();
                 //console.log(headers);
-                window.linkPager(jqXHR);
+                linkPager(jqXHR);
                 var per_page = jqXHR.getResponseHeader('x-pagination-per-page');
-                window.table(data,per_page,false);
+                table(data,per_page,false);
             },
             error: function () {
             },
@@ -100,14 +100,14 @@ $js=<<<JS
     };
     $(document).on('click','#search_product',function(e){
         e.preventDefault();
-        window.search(1);
+        search(1);
     });
     $(document).on('click','#search_reset',function(e){
         e.preventDefault();
         $('#product-name').val('');
         $('#product-category_id').val(0);
         $('#product-tags').val(0);
-        window.pagination(1);
+        pagination(1);
     });
     const detailRows = [];
     function description(data) {
@@ -115,13 +115,13 @@ $js=<<<JS
     }
     $(document).on('click','ul.pagination li',function(e){
         e.preventDefault();
-        if (window.searching){
-            window.search($(this).data('page'));
+        if (searching){
+            search($(this).data('page'));
         }else{
-            window.pagination($(this).data('page'));
+            pagination($(this).data('page'));
         }
     });
-    window.table = function(data,per_page,paging){
+    table = function(data,per_page,paging){
         if ( $.fn.dataTable.isDataTable( '#myTable' ) ) {
             $('#myTable').DataTable().clear().draw();
             $('#myTable').DataTable().rows.add(data).draw();
@@ -203,7 +203,7 @@ $js=<<<JS
             });
         }
     }
-    window.linkPager = function(jqXHR){
+    linkPager = function(jqXHR){
         $('.pagination').html('');
         var current_page = jqXHR.getResponseHeader('x-pagination-current-page');
         var page_count   = jqXHR.getResponseHeader('x-pagination-page-count');
@@ -222,8 +222,8 @@ $js=<<<JS
             $('.pagination').html(paginationHtml);
         }
     }
-    window.pagination = function(page){
-        window.searching = false;
+    pagination = function(page){
+        searching = false;
         $.ajax({
             type:'get',
             url: '/api/product',
@@ -232,13 +232,13 @@ $js=<<<JS
             },
             success: function(data, status, jqXHR) {
                 var per_page = jqXHR.getResponseHeader('x-pagination-per-page');
-                window.linkPager(jqXHR);
-                window.table(data,per_page,false);
+                linkPager(jqXHR);
+                table(data,per_page,false);
             },
             error: function () {
             },
         });
     }
-    window.pagination(1);
+    pagination(1);
 JS;
 $this->registerJS($js);
