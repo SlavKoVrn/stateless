@@ -107,6 +107,7 @@ $js=<<<JS
     $(document).on('click','#search_reset',function(e){
         e.preventDefault();
         $('#product-name').val('');
+        $('#product-description').val('');
         $('#product-category_id').val(0);
         $('#product-tags').val(0);
         pagination(1);
