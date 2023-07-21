@@ -148,11 +148,10 @@ $js=<<<JS
                     { 
                         data: 'category',
                         'render':function(data,type,row){
-                            span = '<span>'
                             if (inArray(data.id,$('#product-category_id').val())){
-                                span = '<span style="color:red">';
+                                return '<strong style="color:red">'+ data.id+'. '+data.name+'</strong>';
                             }
-                            return span + data.id+'. '+data.name+'</span>';
+                            return data.id+'. '+data.name;
                         }
                     },
                     {
@@ -168,9 +167,10 @@ $js=<<<JS
                             data.forEach(function(tag){
                                 td = '<td>';
                                 if (inArray(tag.id,$('#product-tags').val())){
-                                    td = '<td style="color:red">';
+                                    tags+='<tr><td><strong style="color:red">'+tag.id+'. '+tag.name+'</strong></td></tr>';
+                                }else{
+                                    tags+='<tr><td>'+tag.id+'. '+tag.name+'</td></tr>';
                                 }
-                                tags+='<tr>'+td+tag.id+'. '+tag.name+'</td></tr>';
                             });
                             return tags;
                         }
