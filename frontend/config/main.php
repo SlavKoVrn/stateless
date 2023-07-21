@@ -8,6 +8,8 @@ $params = array_merge(
 
 return [
     'id' => 'app-frontend',
+    'name' => 'Stateless',
+    'language' => 'ru-RU',
     'defaultRoute' => 'product',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],

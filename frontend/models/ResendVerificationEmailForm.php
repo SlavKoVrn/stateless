@@ -2,8 +2,8 @@
 
 namespace frontend\models;
 
-use Yii;
 use common\models\User;
+use Yii;
 use yii\base\Model;
 
 class ResendVerificationEmailForm extends Model
@@ -28,6 +28,13 @@ class ResendVerificationEmailForm extends Model
                 'filter' => ['status' => User::STATUS_INACTIVE],
                 'message' => 'There is no user with this email address.'
             ],
+        ];
+    }
+
+    public function attributeLabels()
+    {
+        return [
+            'email'=>'Почта',
         ];
     }
 

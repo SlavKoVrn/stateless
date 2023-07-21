@@ -2,9 +2,9 @@
 
 namespace frontend\models;
 
+use common\models\User;
 use Yii;
 use yii\base\Model;
-use common\models\User;
 
 /**
  * Password reset request form
@@ -28,6 +28,13 @@ class PasswordResetRequestForm extends Model
                 'filter' => ['status' => User::STATUS_ACTIVE],
                 'message' => 'There is no user with this email address.'
             ],
+        ];
+    }
+
+    public function attributeLabels()
+    {
+        return [
+            'email'=>'Почта',
         ];
     }
 
