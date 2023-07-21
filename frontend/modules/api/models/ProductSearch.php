@@ -66,12 +66,15 @@ class ProductSearch extends Product
             Product::tableName().'.[[id]]' => $this->id,
         ]);
 
-        $query->andFilterWhere([ 'between',Product::tableName().'.[[price]]',
-            intval($this->priceFrom),intval($this->priceTo)]);
+        if ($this->priceFrom and $this->priceTo){
+            $query->andFilterWhere([ 'between',Product::tableName().'.[[price]]',
+                intval($this->priceFrom),intval($this->priceTo)]);
+        }
 
         $query->andFilterWhere(['like', Product::tableName().'.[[name]]', $this->name])
             ->andFilterWhere(['like', Product::tableName().'.[[description]]', $this->description]);
 
+        /*
         $sql = $query->createCommand()->rawSql;
         $sql = str_replace('FROM',"\nFROM",$sql);
         $sql = str_replace('AND', "\nAND",$sql);
@@ -81,6 +84,7 @@ class ProductSearch extends Product
         $sql = str_replace('GROUP',"\nGROUP",$sql);
         $sql = str_replace('ORDER',"\nORDER",$sql);
         $sql = str_replace('LIMIT',"\nLIMIT",$sql);
+        */
 
         return $dataProvider;
     }
