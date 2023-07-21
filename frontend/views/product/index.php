@@ -123,9 +123,12 @@ $js=<<<JS
         }else{
             $('#myTable').DataTable({
                 data:data,
-                'pageLength': per_page,
-                'paging':paging,
-                'searching':false,
+                pageLength: per_page,
+                paging:paging,
+                searching:true,
+                scrollCollapse: true,
+                scrollX: '100vh',
+                scrollY: '100vh',
                 language: window.language,
                 columns: [
                     {
