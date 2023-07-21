@@ -7,6 +7,7 @@ use yii\widgets\ActiveForm;
 
 /** @var yii\web\View $this */
 \common\assets\DataTableAsset::register($this);
+\common\assets\IziToastAsset::register($this);
 ?>
 
 <?php $form = ActiveForm::begin(); ?>
@@ -33,6 +34,7 @@ use yii\widgets\ActiveForm;
         </tr>
     </thead>
 </table>
+<div id="infotop"><div>
 <ul class="pagination"></ul>
 <style>
     ul.pagination > li {
@@ -95,6 +97,13 @@ $js=<<<JS
                 linkPager(jqXHR);
                 var per_page = jqXHR.getResponseHeader('x-pagination-per-page');
                 table(data,per_page,false);
+                if (!data.length){
+                    iziToast.error({
+                        title: 'Не найдено',
+                        message: 'измените параметры поиска',
+                        timeout: 8000
+                    });
+                }
             },
             error: function () {
             },
@@ -140,6 +149,8 @@ $js=<<<JS
                 scrollCollapse: true,
                 scrollY: '100vh',
                 language: language,
+                info:true,
+                //dom: '<"top"lf>rt<"bottom"pi><"clear">',
                 columns: [
                     {
                         class: 'dt-control',
@@ -181,7 +192,7 @@ $js=<<<JS
                     { data: 'price' },
                 ]
             });
-            
+            $('.dataTables_info').appendTo('#infotop');
             $('#myTable').on('click', 'tbody td.dt-control', function () {
                 let tr = event.target.closest('tr');
                 let row = $('#myTable').DataTable().row(tr);
