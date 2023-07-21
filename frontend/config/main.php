@@ -61,6 +61,7 @@ return [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
+                'POST auth'=> 'api/site/login',
             ],
         ],
     ],
