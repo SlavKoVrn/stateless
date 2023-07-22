@@ -3,6 +3,7 @@
 namespace frontend\modules\api\models;
 
 use common\models\User;
+use Yii;
 use yii\base\Model;
 
 /**
@@ -65,7 +66,7 @@ class LoginForm extends Model
             $user = $this->getUser();
             $day = time() + 3600 * 24;
             $user->setAttributes([
-                'token' => md5($day),
+                'token' => Yii::$app->security->generateRandomString(),
                 'expired_at' => $day,
             ]);
             if ($user->save()){
