@@ -59,6 +59,11 @@ return [
             'rules' => [
                 'POST auth'=> 'api/site/login',
                 'GET profile' => 'api/profile/index',
+                [
+                    'class'=>\yii\rest\UrlRule::class,
+                    'pluralize'=>false,
+                    'controller' => ['api/category'],
+                ]
             ],
         ],
     ],

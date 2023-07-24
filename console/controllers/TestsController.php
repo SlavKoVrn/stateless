@@ -56,6 +56,7 @@ namespace frontend\\tests\\functional;
 use common\\fixtures\\{$model}Fixture;
 use common\\fixtures\\UserFixture;
 use frontend\\tests\\FunctionalTester;
+use Faker\Factory;
 
 class {$model}Cest
 {
@@ -75,6 +76,13 @@ class {$model}Cest
 
     public function get{$model}(FunctionalTester \$I)
     {
+        \$I->expectTo('get {$model}');
+        \$I->sendGET('/api/{$route}');
+        \$I->seeResponseCodeIs(200);
+    }
+
+    public function post{$model}(FunctionalTester \$I)
+    {
         \$I->sendPOST('/auth',[
             'username' => 'admin',
             'password' => '123456'
@@ -82,11 +90,23 @@ class {$model}Cest
         \$responseContent = \$I->grabResponse();
         \$jsonResponse = json_decode(\$responseContent, true);
 
-        \$I->expectTo('get {$model}');
-        \$I->sendGET('/api/{$route}',[
-            'access-token' => \$jsonResponse['token'],
+        \$I->expectTo('post {$model}');
+        \$faker = Factory::create('ru_RU');
+        \$name = \$faker->realText(22);
+        \$description = \$faker->realText(1000);
+        \$I->sendPOST('/api/{$route}?access-token='.\$jsonResponse['token'],[
+            'name' => \$name,
+            'description' => \$description,
         ]);
+        \$I->seeResponseCodeIs(201);
+        
+        \$I->sendGET('/api/{$route}?s[name]='.\$name);
         \$I->seeResponseCodeIs(200);
+        \$I->seeResponseContainsJson([
+            'name' => \$name,
+            'description' => \$description,
+        ]);
+        \$I->seeHttpHeader('X-Pagination-Total-Count', 1);
     }
 
 }
@@ -149,10 +169,14 @@ namespace frontend\\modules\\api\\controllers;
 use common\\models\\{$model};
 use frontend\\modules\\api\\models\\{$model}Search;
 use Yii;
+use yii\\helpers\\Url;
 use yii\\filters\\AccessControl;
 use yii\\filters\\auth\QueryParamAuth;
 use yii\\filters\\auth\\HttpBasicAuth;
 use yii\\filters\\auth\\HttpBearerAuth;
+use yii\\web\\ForbiddenHttpException;
+use yii\\web\\ServerErrorHttpException;
+
 class {$model}Controller extends \\yii\\rest\\ActiveController
 {
     public \$modelClass = {$model}::class;
@@ -160,6 +184,7 @@ class {$model}Controller extends \\yii\\rest\\ActiveController
     public function behaviors()
     {
         \$behaviors = parent::behaviors();
+        \$behaviors['authenticator']['only'] = ['create', 'update', 'delete'];
         \$behaviors['authenticator']['authMethods'] = [
             HttpBasicAuth::class,
             HttpBearerAuth::class,
@@ -167,6 +192,7 @@ class {$model}Controller extends \\yii\\rest\\ActiveController
         ];
         \$behaviors['access'] = [
             'class' => AccessControl::class,
+            'only' => ['create', 'update', 'delete'],
             'rules' => [
                 [
                     'allow' => true,
@@ -179,7 +205,6 @@ class {$model}Controller extends \\yii\\rest\\ActiveController
 
     public function actions(){
         \$actions = parent::actions();
-        unset(\$actions['create'],\$actions['update'],\$actions['delete']);
         \$actions['index']['prepareDataProvider'] = [\$this,'prepareDataProvider'];
         return \$actions;
     }
@@ -193,6 +218,30 @@ class {$model}Controller extends \\yii\\rest\\ActiveController
         return \$searchModel->search(\$requestParams);
     }
 
+    public function actionCreate()
+    {
+        \$model = new {$model};
+
+        \$model->load(Yii::\$app->getRequest()->getBodyParams(), '');
+        if (\$model->save()) {
+            \$response = Yii::\$app->getResponse();
+            \$response->setStatusCode(201);
+            \$id = implode(',', \$model->getPrimaryKey(true));
+            \$response->getHeaders()->set('Location', Url::toRoute([\$this->viewAction, 'id' => \$id], true));
+        } elseif (!\$model->hasErrors()) {
+            throw new ServerErrorHttpException('Failed to create the object for unknown reason.');
+        }
+        return \$model;
+    }
+
+    public function checkAccess(\$action, \$model = null, \$params = [])
+    {
+        if (in_array(\$action,['update','delete'])){
+            if (Yii::\$app->user->isGuest()){
+                throw new ForbiddenHttpException('Forbidden');
+            }
+        }
+    }
 }
 CONTROLLER;
         $fileController = Yii::getAlias('@frontend').'/modules/api/controllers/'.$model.'Controller.php';
@@ -204,6 +253,7 @@ CONTROLLER;
     public function actionIndex()
     {
         $models = ['User', 'Product', 'Category', 'Tag', 'ProductTag'];
+        $models = ['Category'];
         foreach ($models as $model){
             $this->setFixture($model);
             $this->setFixtureData($model);
