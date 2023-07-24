@@ -129,6 +129,10 @@ class {$model}Search extends {$model}
         {$searchConditions}
         return \$dataProvider;
     }
+    public function formName()
+    {
+        return 's';
+    }
 }
 SEARCH_MODEL;
         $fileSearch = Yii::getAlias('@frontend').'/modules/api/models/'.$model.'Search.php';
