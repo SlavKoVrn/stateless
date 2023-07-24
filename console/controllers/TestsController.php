@@ -4,8 +4,9 @@ namespace console\controllers;
 
 use Yii;
 use yii\console\Controller;
+use yii\gii\generators\crud\Generator;
 
-class FixturesController extends Controller
+class TestsController extends Controller
 {
     private function setFixture($model)
     {
@@ -21,7 +22,9 @@ class {$model}Fixture extends ActiveFixture
 }
 FIXTURE;
         $fileFixture = Yii::getAlias('@common').'/fixtures/'.$model.'Fixture.php';
-        file_put_contents($fileFixture,$modelFixture);
+        if (!is_file($fileFixture)){
+            file_put_contents($fileFixture,$modelFixture);
+        }
     }
 
     private function setFixtureData($model)
@@ -36,7 +39,9 @@ FIXTURE;
         }
         $fileData = Yii::getAlias('@frontend').'/tests/_data/'.$lowerModel.'.php';
         $fileContent = "<?php\nreturn ".var_export($modelsArray, true).";";
-        file_put_contents($fileData, $fileContent);
+        if (!is_file($fileData)){
+            file_put_contents($fileData, $fileContent);
+        }
     }
 
     private function setTest($model)
@@ -49,6 +54,7 @@ FIXTURE;
 namespace frontend\\tests\\functional;
 
 use common\\fixtures\\{$model}Fixture;
+use common\\fixtures\\UserFixture;
 use frontend\\tests\\FunctionalTester;
 
 class {$model}Cest
@@ -60,13 +66,26 @@ class {$model}Cest
                 'class' => {$model}Fixture::class,
                 'dataFile' => codecept_data_dir() . '{$lowerModel}.php',
             ],
+            'user' => [
+                'class' => UserFixture::class,
+                'dataFile' => codecept_data_dir() . 'user.php',
+            ],
         ];
     }
 
     public function get{$model}(FunctionalTester \$I)
     {
+        \$I->sendPOST('/auth',[
+            'username' => 'admin',
+            'password' => '123456'
+        ]);
+        \$responseContent = \$I->grabResponse();
+        \$jsonResponse = json_decode(\$responseContent, true);
+
         \$I->expectTo('get {$model}');
-        \$I->sendGET('/api/{$route}');
+        \$I->sendGET('/api/{$route}',[
+            'access-token' => \$jsonResponse['token'],
+        ]);
         \$I->seeResponseCodeIs(200);
     }
 
@@ -78,6 +97,12 @@ TEST_CONTENT;
 
     private function setSearch($model)
     {
+        $generator = new Generator;
+        $generator->modelClass = "common\\models\\".$model;
+        $rules = $generator->generateSearchRules();
+        $rules = implode(",\n            ", $rules);
+        $searchConditions = $generator->generateSearchConditions();
+        $searchConditions = implode("\n        ", $searchConditions);
         $searchModel =<<<SEARCH_MODEL
 <?php
 namespace frontend\\modules\\api\\models;
@@ -88,8 +113,7 @@ class {$model}Search extends {$model}
     public function rules()
     {
         return [
-            [['id'], 'integer'],
-            [['name'], 'safe'],
+            {$rules}
         ];
     }
     public function search(\$params)
@@ -102,10 +126,7 @@ class {$model}Search extends {$model}
         if (!\$this->validate()) {
             return \$dataProvider;
         }
-        \$query->andFilterWhere([
-            'id' => \$this->id,
-        ]);
-        \$query->andFilterWhere(['like', 'name', \$this->name]);
+        {$searchConditions}
         return \$dataProvider;
     }
 }
@@ -122,14 +143,16 @@ SEARCH_MODEL;
 <?php
 namespace frontend\\modules\\api\\controllers;
 use common\\models\\{$model};
+use frontend\\modules\\api\\models\\{$model}Search;
 use Yii;
-use yii\rest\Controller;
-use yii\filters\AccessControl;
-use yii\filters\auth\QueryParamAuth;
-use yii\filters\auth\HttpBasicAuth;
-use yii\filters\auth\HttpBearerAuth;
-class ProfileController extends Controller
+use yii\\filters\\AccessControl;
+use yii\\filters\\auth\QueryParamAuth;
+use yii\\filters\\auth\\HttpBasicAuth;
+use yii\\filters\\auth\\HttpBearerAuth;
+class {$model}Controller extends \\yii\\rest\\ActiveController
 {
+    public \$modelClass = {$model}::class;
+
     public function behaviors()
     {
         \$behaviors = parent::behaviors();
@@ -149,31 +172,6 @@ class ProfileController extends Controller
         ];
         return \$behaviors;
     }
-    public function actionIndex()
-    {
-        return \$this->findModel();
-    }
-    protected function verbs()
-    {
-        return [
-            'index' => ['get'],
-        ];
-    }
-    private function findModel(\$id)
-    {
-        return {$model}::findOne(\$id);
-    }
-}
-CONTROLLER;
-        $controller =<<<CONTROLLER
-<?php
-namespace frontend\\modules\\api\\controllers;
-use common\\models\\{$model};
-use frontend\\modules\\api\\models\\{$model}Search;
-use Yii;
-class {$model}Controller extends \\yii\\rest\\ActiveController
-{
-    public \$modelClass = {$model}::class;
 
     public function actions(){
         \$actions = parent::actions();
@@ -201,7 +199,7 @@ CONTROLLER;
 
     public function actionIndex()
     {
-        $models = ['Product','Category','Tag','ProductTag'];
+        $models = ['User', 'Product', 'Category', 'Tag', 'ProductTag'];
         foreach ($models as $model){
             $this->setFixture($model);
             $this->setFixtureData($model);
