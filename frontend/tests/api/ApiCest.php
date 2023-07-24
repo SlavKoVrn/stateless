@@ -48,6 +48,12 @@ class ApiCest
         $I->seeResponseIsJson();
         $I->canSeeResponseJsonMatchesJsonPath('$.token');
         $I->canSeeResponseJsonMatchesJsonPath('$.expired');
+        $responseContent = $I->grabResponse();
+        $jsonResponse = json_decode($responseContent, true);
+        $I->sendGET('/api/profile',[
+            'access-token' => $jsonResponse['token'],
+        ]);
+        $I->seeResponseCodeIs(200);
     }
 
 

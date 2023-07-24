@@ -5,6 +5,7 @@ namespace frontend\modules\api\controllers;
 use common\models\User;
 use Yii;
 use yii\filters\AccessControl;
+use yii\filters\auth\QueryParamAuth;
 use yii\filters\auth\HttpBasicAuth;
 use yii\filters\auth\HttpBearerAuth;
 use yii\rest\Controller;
@@ -21,6 +22,7 @@ class ProfileController extends Controller
         $behaviors['authenticator']['authMethods'] = [
             HttpBasicAuth::class,
             HttpBearerAuth::class,
+            QueryParamAuth::class,
         ];
         $behaviors['access'] = [
             'class' => AccessControl::class,
