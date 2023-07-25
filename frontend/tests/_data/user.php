@@ -13,6 +13,6 @@ return array (
     'updated_at' => 1689960416,
     'verification_token' => '',
     'token' => 'f8fc7d0bdfe9ec82fc0d9acb147b9738',
-    'expired_at' => 1690046816,
+    'expired_at' => time() + 3600,
   ),
 );

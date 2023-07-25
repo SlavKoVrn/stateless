@@ -8,6 +8,7 @@ use yii\gii\generators\crud\Generator;
 
 class TestsController extends Controller
 {
+    private $overwrite = true;
     private function setFixture($model)
     {
         $modelFixture =<<<FIXTURE
@@ -22,7 +23,9 @@ class {$model}Fixture extends ActiveFixture
 }
 FIXTURE;
         $fileFixture = Yii::getAlias('@common').'/fixtures/'.$model.'Fixture.php';
-        if (!is_file($fileFixture)){
+        if ($this->overwrite){
+            file_put_contents($fileFixture,$modelFixture);
+        }elseif (!is_file($fileFixture)){
             file_put_contents($fileFixture,$modelFixture);
         }
     }
@@ -39,7 +42,9 @@ FIXTURE;
         }
         $fileData = Yii::getAlias('@frontend').'/tests/_data/'.$lowerModel.'.php';
         $fileContent = "<?php\nreturn ".var_export($modelsArray, true).";";
-        if (!is_file($fileData)){
+        if ($this->overwrite){
+            file_put_contents($fileData, $fileContent);
+        }elseif (!is_file($fileData)){
             file_put_contents($fileData, $fileContent);
         }
     }
@@ -156,7 +161,9 @@ class {$model}Search extends {$model}
 }
 SEARCH_MODEL;
         $fileSearch = Yii::getAlias('@frontend').'/modules/api/models/'.$model.'Search.php';
-        if (!is_file($fileSearch)){
+        if ($this->overwrite){
+            file_put_contents($fileSearch,$searchModel);
+        }elseif (!is_file($fileSearch)){
             file_put_contents($fileSearch,$searchModel);
         }
     }
@@ -168,6 +175,7 @@ SEARCH_MODEL;
 namespace frontend\\modules\\api\\controllers;
 use common\\models\\{$model};
 use frontend\\modules\\api\\models\\{$model}Search;
+use common\\rbac\\Rbac;
 use Yii;
 use yii\\helpers\\Url;
 use yii\\filters\\AccessControl;
@@ -205,6 +213,7 @@ class {$model}Controller extends \\yii\\rest\\ActiveController
 
     public function actions(){
         \$actions = parent::actions();
+        unset(\$actions['create']);
         \$actions['index']['prepareDataProvider'] = [\$this,'prepareDataProvider'];
         return \$actions;
     }
@@ -221,13 +230,14 @@ class {$model}Controller extends \\yii\\rest\\ActiveController
     public function actionCreate()
     {
         \$model = new {$model};
+        \$model->user_id = Yii::\$app->user->id;
 
         \$model->load(Yii::\$app->getRequest()->getBodyParams(), '');
         if (\$model->save()) {
             \$response = Yii::\$app->getResponse();
             \$response->setStatusCode(201);
             \$id = implode(',', \$model->getPrimaryKey(true));
-            \$response->getHeaders()->set('Location', Url::toRoute([\$this->viewAction, 'id' => \$id], true));
+            \$response->getHeaders()->set('Location', Url::toRoute(['view', 'id' => \$id], true));
         } elseif (!\$model->hasErrors()) {
             throw new ServerErrorHttpException('Failed to create the object for unknown reason.');
         }
@@ -237,7 +247,7 @@ class {$model}Controller extends \\yii\\rest\\ActiveController
     public function checkAccess(\$action, \$model = null, \$params = [])
     {
         if (in_array(\$action,['update','delete'])){
-            if (Yii::\$app->user->isGuest()){
+            if (Yii::\$app->user->can(Rbac::MANAGE_PRODUCT,['product' => \$model])){
                 throw new ForbiddenHttpException('Forbidden');
             }
         }
@@ -245,7 +255,9 @@ class {$model}Controller extends \\yii\\rest\\ActiveController
 }
 CONTROLLER;
         $fileController = Yii::getAlias('@frontend').'/modules/api/controllers/'.$model.'Controller.php';
-        if (!is_file($fileController)){
+        if ($this->overwrite){
+            file_put_contents($fileController,$controller);
+        }elseif (!is_file($fileController)){
             file_put_contents($fileController,$controller);
         }
     }
@@ -253,7 +265,7 @@ CONTROLLER;
     public function actionIndex()
     {
         $models = ['User', 'Product', 'Category', 'Tag', 'ProductTag'];
-        $models = ['Category'];
+        $models = ['Product'];
         foreach ($models as $model){
             $this->setFixture($model);
             $this->setFixtureData($model);
