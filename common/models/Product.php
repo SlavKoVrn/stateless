@@ -33,7 +33,7 @@ class Product extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['category_id', 'price'], 'integer'],
+            [['category_id', 'user_id', 'price'], 'integer'],
             [['description'], 'string'],
             [['name', 'slug'], 'string', 'max' => 255],
             ['tags', 'each', 'rule' => ['integer']],
@@ -48,6 +48,7 @@ class Product extends \yii\db\ActiveRecord
         return [
             'id' => 'Ид',
             'category_id' => 'Категория',
+            'user_id' => 'Владелец',
             'price' => 'Цена',
             'name' => 'Товар',
             'slug' => 'Ссылка',
