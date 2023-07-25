@@ -10,9 +10,9 @@ class ProfileOwnerRule extends Rule
 
     public function execute($userId, $item, $params)
     {
-        if (empty($params['user'])){
+        if (empty($params['user_id'])){
             throw new InvalidCallException('Specify user.');
         }
-        return $params['user'] == $userId;
+        return $params['user_id'] == $userId;
     }
 }

@@ -3,18 +3,21 @@
 namespace frontend\modules\api\controllers;
 
 use common\models\User;
+use common\rbac\Rbac;
 use Yii;
 use yii\filters\AccessControl;
-use yii\filters\auth\QueryParamAuth;
 use yii\filters\auth\HttpBasicAuth;
 use yii\filters\auth\HttpBearerAuth;
-use yii\rest\Controller;
+use yii\filters\auth\QueryParamAuth;
+use yii\rest\ActiveController;
 
 /**
  * Site controller
  */
-class ProfileController extends Controller
+class ProfileController extends ActiveController
 {
+
+    public $modelClass = User::class;
 
     public function behaviors()
     {
@@ -36,12 +39,11 @@ class ProfileController extends Controller
         return $behaviors;
     }
 
-    public function actionIndex()
-    {
-        return $this->findModel();
+    public function actions(){
+        $actions = parent::actions();
+        unset($actions['create'],$actions['update'],$actions['delete']);
+        return $actions;
     }
-
-
 
     protected function verbs()
     {
@@ -50,8 +52,22 @@ class ProfileController extends Controller
         ];
     }
 
+    public function actionIndex()
+    {
+        return $this->findModel();
+    }
+
     private function findModel()
     {
         return User::findOne(Yii::$app->user->id);
     }
+
+    public function checkAccess($action, $model = null, $params = [])
+    {
+        if (Yii::$app->user->can(Rbac::MANAGE_PROFILE,[
+            'user_id' => Yii::$app->user->id
+        ])) return true;
+        return false;
+    }
+
 }

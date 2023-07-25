@@ -11,7 +11,7 @@ return [
         'email' => 'slavko.chita@gmail.com',
         'status' => '10',
         'token' => 'f8fc7d0bdfe9ec82fc0d9acb147b9738',
-        'expired_at' => '1690046816',
+        'expired_at' => time() + 3600,
     ],
     [
         'username' => 'troy.becker',
@@ -23,6 +23,6 @@ return [
         'email' => 'nicolas.dianna@hotmail.com',
         'status' => '0',
         'token' => 'EdKfXrx88weFMV0vIxuTMWKgfK2tS3Lp',
-        'expired_at' => '1690046816',
+        'expired_at' => time() - 3600,
     ],
 ];

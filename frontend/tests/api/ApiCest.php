@@ -37,6 +37,12 @@ class ApiCest
         ]);
     }
 
+    public function getProfileWithoutCredentions(FunctionalTester $I)
+    {
+        $I->sendGET('/api/profile');
+        $I->seeResponseCodeIs(401);
+    }
+
     public function success(FunctionalTester $I)
     {
         $I->expectTo('correct auth');
