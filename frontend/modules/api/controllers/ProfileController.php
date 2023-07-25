@@ -3,7 +3,6 @@
 namespace frontend\modules\api\controllers;
 
 use common\models\User;
-use common\rbac\Rbac;
 use Yii;
 use yii\filters\AccessControl;
 use yii\filters\auth\HttpBasicAuth;
@@ -41,7 +40,7 @@ class ProfileController extends ActiveController
 
     public function actions(){
         $actions = parent::actions();
-        unset($actions['create'],$actions['update'],$actions['delete']);
+        unset($actions['index'],$actions['create'],$actions['update'],$actions['delete']);
         return $actions;
     }
 
@@ -64,9 +63,7 @@ class ProfileController extends ActiveController
 
     public function checkAccess($action, $model = null, $params = [])
     {
-        if (Yii::$app->user->can(Rbac::MANAGE_PROFILE,[
-            'user_id' => Yii::$app->user->id
-        ])) return true;
+        if ($model->id == Yii::$app->user->id) return true;
         return false;
     }
 

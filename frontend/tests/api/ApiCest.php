@@ -60,6 +60,10 @@ class ApiCest
             'access-token' => $jsonResponse['token'],
         ]);
         $I->seeResponseCodeIs(200);
+        $responseContent = $I->grabResponse();
+        $jsonResponse = json_decode($responseContent, true);
+        echo 'profile = '.print_r($jsonResponse,true);
+
     }
 
 

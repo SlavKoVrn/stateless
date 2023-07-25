@@ -213,4 +213,13 @@ class User extends ActiveRecord implements IdentityInterface
     {
         $this->password_reset_token = null;
     }
+
+    public function fields()
+    {
+        return [
+            'id' => 'id',
+            'username' => 'username',
+            'email' => 'email',
+        ];
+    }
 }
