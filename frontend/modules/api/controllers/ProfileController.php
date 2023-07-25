@@ -53,7 +53,10 @@ class ProfileController extends ActiveController
 
     public function actionIndex()
     {
-        return $this->findModel();
+        $model = $this->findModel();
+        if ($this->checkAccess('index', $model, ['user_id' => $model->id]))
+            return $this->findModel();
+        return null;
     }
 
     private function findModel()
@@ -63,7 +66,7 @@ class ProfileController extends ActiveController
 
     public function checkAccess($action, $model = null, $params = [])
     {
-        if ($model->id == Yii::$app->user->id) return true;
+        if ($model and $model->id == Yii::$app->user->id) return true;
         return false;
     }
 
