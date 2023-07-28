@@ -63,7 +63,12 @@ return [
                     'class'=>\yii\rest\UrlRule::class,
                     'pluralize'=>false,
                     'controller' => ['api/category','api/product'],
-                ]
+                ],
+                [
+                    'class'=>\yii\rest\UrlRule::class,
+                    'pluralize'=>false,
+                    'controller' => ['api/good'],
+                ],
             ],
         ],
     ],
