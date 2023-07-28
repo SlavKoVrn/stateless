@@ -3,38 +3,12 @@ namespace console\controllers;
 
 use Yii;
 use yii\console\Controller;
-use yii\gii\generators\model\Generator as ModelGenerator;
 use yii\gii\generators\crud\Generator as CrudGenerator;
+use yii\gii\generators\model\Generator as ModelGenerator;
 use yii\helpers\Inflector;
 
 class GenerateController extends Controller
 {
-    public function actionDelete($table)
-    {
-        $className = Inflector::id2camel($table, '_');
-        $fileInsertController = Yii::getAlias('@console').'/controllers/'.$className.'Controller.php';
-        unlink($fileInsertController);
-        echo "$fileInsertController\n";
-        //$fileMigration = Yii::getAlias('@console').'/migrations/'.$migrationName.'.php';
-        $fileModel = Yii::getAlias('@common').'/models/'.$className.'.php';
-        unlink($fileModel);
-        echo "$fileModel\n";
-        $fileFixture = Yii::getAlias('@common').'/fixtures/'.$className.'Fixture.php';
-        unlink($fileFixture);
-        echo "$fileFixture\n";
-        $fileFixtureData = Yii::getAlias('@frontend').'/tests/_data/'.strtolower($className).'.php';
-        unlink($fileFixtureData);
-        echo "$fileFixtureData\n";
-        $fileTest = Yii::getAlias('@frontend').'/tests/api/'.$className.'Cest.php';
-        unlink($fileTest);
-        echo "$fileTest\n";
-        $fileSearch = Yii::getAlias('@frontend').'/modules/api/models/'.$className.'Search.php';
-        unlink($fileSearch);
-        echo "$fileSearch\n";
-        $fileController = Yii::getAlias('@frontend').'/modules/api/controllers/'.$className.'Controller.php';
-        unlink($fileController);
-        echo "$fileController\n";
-    }
     public function actionIndex($table)
     {
         $className = Inflector::id2camel($table, '_');
@@ -74,6 +48,33 @@ CONFIG;
             $this->generateMigration($table);
             echo "php yii migrate\n";
         }
+    }
+
+    public function actionDelete($table)
+    {
+        $className = Inflector::id2camel($table, '_');
+        $fileInsertController = Yii::getAlias('@console').'/controllers/'.$className.'Controller.php';
+        unlink($fileInsertController);
+        echo "$fileInsertController\n";
+        //$fileMigration = Yii::getAlias('@console').'/migrations/'.$migrationName.'.php';
+        $fileModel = Yii::getAlias('@common').'/models/'.$className.'.php';
+        unlink($fileModel);
+        echo "$fileModel\n";
+        $fileFixture = Yii::getAlias('@common').'/fixtures/'.$className.'Fixture.php';
+        unlink($fileFixture);
+        echo "$fileFixture\n";
+        $fileFixtureData = Yii::getAlias('@frontend').'/tests/_data/'.strtolower($className).'.php';
+        unlink($fileFixtureData);
+        echo "$fileFixtureData\n";
+        $fileTest = Yii::getAlias('@frontend').'/tests/api/'.$className.'Cest.php';
+        unlink($fileTest);
+        echo "$fileTest\n";
+        $fileSearch = Yii::getAlias('@frontend').'/modules/api/models/'.$className.'Search.php';
+        unlink($fileSearch);
+        echo "$fileSearch\n";
+        $fileController = Yii::getAlias('@frontend').'/modules/api/controllers/'.$className.'Controller.php';
+        unlink($fileController);
+        echo "$fileController\n";
     }
 
     private function generateInsertController($table)
