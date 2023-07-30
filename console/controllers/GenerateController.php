@@ -3,6 +3,7 @@ namespace console\controllers;
 
 use Yii;
 use yii\console\Controller;
+use yii\db\Migration;
 use yii\gii\generators\crud\Generator as CrudGenerator;
 use yii\gii\generators\model\Generator as ModelGenerator;
 use yii\helpers\Inflector;
@@ -53,28 +54,58 @@ CONFIG;
     public function actionDelete($table)
     {
         $className = Inflector::id2camel($table, '_');
+        $migration_dir = Yii::getAlias('@console').'/migrations';
+        $migrations = scandir($migration_dir);
+        foreach ($migrations as $migration){
+            if (str_contains($migration, 'create_table_'.$table.'.php')){
+                if ($this->tableExists($table)){
+                    echo "php yii migrate/down\n";
+                    return;
+                }
+                $fileMigration = $migration_dir.'/'.$migration;
+                unlink($fileMigration);
+                echo "$fileMigration\n";
+            }
+        }
+        if ($this->tableExists($table)){
+            $migration = new Migration;
+            $migration->dropTable($table);
+        }
         $fileInsertController = Yii::getAlias('@console').'/controllers/'.$className.'Controller.php';
-        unlink($fileInsertController);
-        echo "$fileInsertController\n";
-        //$fileMigration = Yii::getAlias('@console').'/migrations/'.$migrationName.'.php';
+        if (is_file($fileInsertController)){
+            unlink($fileInsertController);
+            echo "$fileInsertController\n";
+        }
         $fileModel = Yii::getAlias('@common').'/models/'.$className.'.php';
-        unlink($fileModel);
-        echo "$fileModel\n";
+        if (is_file($fileModel)){
+            unlink($fileModel);
+            echo "$fileModel\n";
+        }
         $fileFixture = Yii::getAlias('@common').'/fixtures/'.$className.'Fixture.php';
-        unlink($fileFixture);
-        echo "$fileFixture\n";
+        if (is_file($fileFixture)){
+            unlink($fileFixture);
+            echo "$fileFixture\n";
+        }
         $fileFixtureData = Yii::getAlias('@frontend').'/tests/_data/'.strtolower($className).'.php';
-        unlink($fileFixtureData);
-        echo "$fileFixtureData\n";
+        if (is_file($fileFixtureData)){
+            unlink($fileFixtureData);
+            echo "$fileFixtureData\n";
+        }
         $fileTest = Yii::getAlias('@frontend').'/tests/api/'.$className.'Cest.php';
-        unlink($fileTest);
-        echo "$fileTest\n";
+        if (is_file($fileTest)){
+            unlink($fileTest);
+            echo "$fileTest\n";
+        }
         $fileSearch = Yii::getAlias('@frontend').'/modules/api/models/'.$className.'Search.php';
-        unlink($fileSearch);
-        echo "$fileSearch\n";
+        if (is_file($fileSearch)){
+            unlink($fileSearch);
+            echo "$fileSearch\n";
+        }
         $fileController = Yii::getAlias('@frontend').'/modules/api/controllers/'.$className.'Controller.php';
-        unlink($fileController);
-        echo "$fileController\n";
+        if (is_file($fileController)){
+            unlink($fileController);
+            echo "$fileController\n";
+        }
     }
 
     private function generateInsertController($table)
@@ -171,12 +202,17 @@ MIGRATION;
         ]);
         $files = $generator->generate();
         $content = $files[0]->content;
+        $content = str_replace('extends \\yii\\db\\ActiveRecord',
+            'extends \\yii\\db\\ActiveRecord implements Linkable', $content);
         $use =<<<USE
 use Yii;
 use yii\db\Expression;
 use yii\helpers\ArrayHelper;
 use yii\behaviors\TimestampBehavior;
 use yii\behaviors\SluggableBehavior;
+use yii\web\Linkable;
+use yii\web\Link;
+use yii\helpers\Url;
 USE;
         $content = str_replace('use Yii;',$use,$content);
         $behaviors =<<<BEHAVIORS
@@ -209,9 +245,40 @@ public function behaviors() {
     /**
      * {@inheritdoc}
      */
+    public function extraFields()
+    {
+        return [
+            'author' => 'user',
+            'category' => 'category',
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function formName()
     {
         return 's';
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getLinks()
+    {
+        return [
+            Link::REL_SELF => Url::to(['$table/view', 'id' => \$this->id],true)
+        ];
+    }
+
+    public function getUser()
+    {
+        return \$this->hasOne(User::class, ['id' => 'user_id']);
+    }
+
+    public function getCategory()
+    {
+        return \$this->hasOne(Category::class, ['id' => 'category_id']);
     }
 
     /**
@@ -380,19 +447,12 @@ class {$model}Search extends {$model}
             return \$dataProvider;
         }
         {$searchConditions}
+
+        \$sql = \$query->createCommand()->rawSql;
+
         return \$dataProvider;
     }
-    public function formName()
-    {
-        return 's';
-    }
-    public function fields()
-    {
-        return [
-            'name' => 'name',
-            'description' => 'description',
-        ];
-    }
+
 }
 SEARCH_MODEL;
         $fileSearch = Yii::getAlias('@frontend').'/modules/api/models/'.$model.'Search.php';
@@ -445,7 +505,6 @@ class {$model}Controller extends \\yii\\rest\\ActiveController
 
     public function actions(){
         \$actions = parent::actions();
-        unset(\$actions['create']);
         \$actions['index']['prepareDataProvider'] = [\$this,'prepareDataProvider'];
         return \$actions;
     }
