@@ -10,6 +10,251 @@ use yii\helpers\Inflector;
 
 class GenerateController extends Controller
 {
+    private function generateTest($model)
+    {
+        $lowerModel = strtolower($model);
+        $route = \yii\helpers\Inflector::camel2id($model, '-');
+
+        $testContent =<<<TEST_CONTENT
+<?php
+namespace frontend\\tests\\functional;
+
+use common\\fixtures\\{$model}Fixture;
+use common\\fixtures\\UserFixture;
+use frontend\\tests\\FunctionalTester;
+use Faker\Factory;
+
+class {$model}Cest
+{
+    public function _fixtures()
+    {
+        return [
+            '{$lowerModel}' => [
+                'class' => {$model}Fixture::class,
+                'dataFile' => codecept_data_dir() . '{$lowerModel}.php',
+            ],
+            'user' => [
+                'class' => UserFixture::class,
+                'dataFile' => codecept_data_dir() . 'user.php',
+            ],
+        ];
+    }
+
+    public function index(FunctionalTester \$I)
+    {
+        \$I->sendGET('/api/{$route}');
+        \$I->seeResponseCodeIs(200);
+        \$I->seeHttpHeader('X-Pagination-Total-Count', '100');
+    }
+
+    public function indexWithAuthor(FunctionalTester \$I)
+    {
+        \$I->sendGET('/api/{$route}?expand=author');
+        \$I->seeResponseCodeIs(200);
+        \$I->seeResponseContainsJson([
+            [
+                'author' => [
+                    'username' => 'admin',
+                ],
+            ]
+        ]);
+        \$responseContent = \$I->grabResponse();
+        \$jsonResponse = json_decode(\$responseContent, true);
+        echo 'expand=';
+        var_dump(\$jsonResponse);
+    }
+
+    public function post{$model}AndSearch(FunctionalTester \$I)
+    {
+        \$I->sendPOST('/auth',[
+            'username' => 'admin',
+            'password' => '123456'
+        ]);
+        \$responseContent = \$I->grabResponse();
+        \$jsonResponse = json_decode(\$responseContent, true);
+        echo 'auth=';
+        var_dump(\$jsonResponse);
+
+        \$faker = Factory::create('ru_RU');
+        \$name = \$faker->realText(22);
+        \$description = \$faker->realText(1000);
+        \$I->sendPOST('/api/{$route}?access-token='.\$jsonResponse['token'],[
+            'name' => \$name,
+            'description' => \$description,
+        ]);
+        \$I->seeResponseCodeIs(201);
+        \$responseContent = \$I->grabResponse();
+        \$jsonResponse = json_decode(\$responseContent, true);
+        echo 'post=';
+        var_dump(\$jsonResponse);
+
+        \$I->sendGET('/api/{$route}?s[name]='.\$name);
+        \$I->seeResponseCodeIs(200);
+        \$I->seeResponseContainsJson([
+            'name' => \$name,
+        ]);
+        \$count = \$I->grabHttpHeader('X-Pagination-Total-Count', true);
+        echo 'count='.\$count."\n";
+        \$responseContent = \$I->grabResponse();
+        \$jsonResponse = json_decode(\$responseContent, true);
+        echo 'search=';
+        var_dump(\$jsonResponse);
+    }
+
+    public function post{$model}AndView(FunctionalTester \$I)
+    {
+        \$I->sendPOST('/auth',[
+            'username' => 'admin',
+            'password' => '123456'
+        ]);
+        \$responseContent = \$I->grabResponse();
+        \$jsonResponse = json_decode(\$responseContent, true);
+
+        \$faker = Factory::create('ru_RU');
+        \$name = \$faker->realText(22);
+        \$description = \$faker->realText(1000);
+        \$I->sendPOST('/api/{$route}?access-token='.\$jsonResponse['token'],[
+            'name' => \$name,
+            'description' => \$description,
+        ]);
+        \$responseContent = \$I->grabResponse();
+        \$jsonResponse = json_decode(\$responseContent, true);
+
+        \$I->sendGET('/api/{$route}/'.\$jsonResponse['id']);
+        \$I->seeResponseCodeIs(200);
+        \$I->seeResponseContainsJson([
+            'id' => \$jsonResponse['id'],
+            'name' => \$jsonResponse['name'],
+        ]);
+        \$responseContent = \$I->grabResponse();
+        \$jsonResponse = json_decode(\$responseContent, true);
+        echo 'view=';
+        var_dump(\$jsonResponse);
+    }
+
+    public function viewNotFound(FunctionalTester \$I)
+    {
+        \$I->sendGET('/api/{$route}/1000');
+        \$I->seeResponseCodeIs(404);
+    }
+
+    public function createUnauthorized(FunctionalTester \$I)
+    {
+        \$I->sendPOST('/api/{$route}', [
+            'name' => 'New',
+        ]);
+        \$I->seeResponseCodeIs(401);
+    }
+
+    public function create(FunctionalTester \$I)
+    {
+        \$I->sendPOST('/auth',[
+            'username' => 'admin',
+            'password' => '123456'
+        ]);
+        \$responseContent = \$I->grabResponse();
+        \$jsonResponse = json_decode(\$responseContent, true);
+
+        \$I->amBearerAuthenticated(\$jsonResponse['token']);
+        \$faker = Factory::create('ru_RU');
+        \$name = \$faker->realText(22);
+        \$description = \$faker->realText(1000);
+        \$I->sendPOST('/api/{$route}', [
+            'name' => \$name,
+            'description' => \$description,
+        ]);
+        \$I->seeResponseCodeIs(201);
+        \$I->seeResponseContainsJson([
+            'name' => \$name,
+            'description' => \$description,
+        ]);
+    }
+
+    public function updateUnauthorized(FunctionalTester \$I)
+    {
+        \$I->sendPATCH('/api/{$route}/1', [
+            'name' => 'New Name',
+        ]);
+        \$I->seeResponseCodeIs(401);
+    }
+
+    public function update(FunctionalTester \$I)
+    {
+        \$I->sendPOST('/auth',[
+            'username' => 'admin',
+            'password' => '123456'
+        ]);
+        \$responseContent = \$I->grabResponse();
+        \$jsonResponse = json_decode(\$responseContent, true);
+
+        \$I->amBearerAuthenticated(\$jsonResponse['token']);
+        \$I->sendPATCH('/api/{$route}/1', [
+            'name' => 'New Name',
+        ]);
+        \$I->seeResponseCodeIs(200);
+        \$I->seeResponseContainsJson([
+            'id' => 1,
+            'name' => 'New Name',
+        ]);
+    }
+
+    public function updateForbidden(FunctionalTester \$I)
+    {
+        \$I->sendPOST('/auth',[
+            'username' => 'admin',
+            'password' => '123456'
+        ]);
+        \$responseContent = \$I->grabResponse();
+        \$jsonResponse = json_decode(\$responseContent, true);
+
+        \$I->amBearerAuthenticated(\$jsonResponse['token']);
+        \$I->sendPATCH('/api/{$route}/2', [
+            'name' => 'New Name',
+        ]);
+        \$I->seeResponseCodeIs(403);
+    }
+
+    public function deleteUnauthorized(FunctionalTester \$I)
+    {
+        \$I->sendDELETE('/api/{$route}/1');
+        \$I->seeResponseCodeIs(401);
+    }
+
+    public function delete(FunctionalTester \$I)
+    {
+        \$I->sendPOST('/auth',[
+            'username' => 'admin',
+            'password' => '123456'
+        ]);
+        \$responseContent = \$I->grabResponse();
+        \$jsonResponse = json_decode(\$responseContent, true);
+
+        \$I->amBearerAuthenticated(\$jsonResponse['token']);
+        \$I->sendDELETE('/api/{$route}/1');
+        \$I->seeResponseCodeIs(204);
+    }
+
+    public function deleteForbidden(FunctionalTester \$I)
+    {
+        \$I->sendPOST('/auth',[
+            'username' => 'admin',
+            'password' => '123456'
+        ]);
+        \$responseContent = \$I->grabResponse();
+        \$jsonResponse = json_decode(\$responseContent, true);
+
+        \$I->amBearerAuthenticated(\$jsonResponse['token']);
+        \$I->sendDELETE('/api/{$route}/2');
+        \$I->seeResponseCodeIs(403);
+    }
+
+}
+TEST_CONTENT;
+        $fileTest = Yii::getAlias('@frontend').'/tests/api/'.$model.'Cest.php';
+        file_put_contents($fileTest,$testContent);
+        echo "$fileTest\n";
+    }
+
     public function actionIndex($table)
     {
         $className = Inflector::id2camel($table, '_');
@@ -237,6 +482,8 @@ public function behaviors() {
     public function fields()
     {
         return [
+            'id' => 'id',
+            'user_id' => 'user_id',
             'name' => 'name',
             'description' => 'description',
         ];
@@ -324,95 +571,15 @@ FIXTURE;
         $allModels = $modelName::find()->all();
         $modelsArray = [];
         foreach ($allModels as $currentModel){
-            $modelsArray[] = $currentModel->attributes;
-
+            $modelsArray[$currentModel->id] = $currentModel->attributes;
+            if ($currentModel->id == 2){
+                $modelsArray[$currentModel->id]['user_id'] = 2;
+            }
         }
         $fileFixtureData = Yii::getAlias('@frontend').'/tests/_data/'.$lowerModel.'.php';
         $fileContent = "<?php\nreturn ".var_export($modelsArray, true).";";
         file_put_contents($fileFixtureData, $fileContent);
         echo "$fileFixtureData\n";
-    }
-
-    private function generateTest($model)
-    {
-        $lowerModel = strtolower($model);
-        $route = \yii\helpers\Inflector::camel2id($model, '-');
-
-        $testContent =<<<TEST_CONTENT
-<?php
-namespace frontend\\tests\\functional;
-
-use common\\fixtures\\{$model}Fixture;
-use common\\fixtures\\UserFixture;
-use frontend\\tests\\FunctionalTester;
-use Faker\Factory;
-
-class {$model}Cest
-{
-    public function _fixtures()
-    {
-        return [
-            '{$lowerModel}' => [
-                'class' => {$model}Fixture::class,
-                'dataFile' => codecept_data_dir() . '{$lowerModel}.php',
-            ],
-            'user' => [
-                'class' => UserFixture::class,
-                'dataFile' => codecept_data_dir() . 'user.php',
-            ],
-        ];
-    }
-
-    public function get{$model}(FunctionalTester \$I)
-    {
-        \$I->expectTo('get {$model}');
-        \$I->sendGET('/api/{$route}');
-        \$I->seeResponseCodeIs(200);
-    }
-
-    public function post{$model}(FunctionalTester \$I)
-    {
-        \$I->sendPOST('/auth',[
-            'username' => 'admin',
-            'password' => '123456'
-        ]);
-        \$responseContent = \$I->grabResponse();
-        \$jsonResponse = json_decode(\$responseContent, true);
-        echo 'auth=';
-        var_dump(\$jsonResponse);
-
-        \$I->expectTo('post {$model}');
-        \$faker = Factory::create('ru_RU');
-        \$name = \$faker->realText(22);
-        \$description = \$faker->realText(1000);
-        \$I->sendPOST('/api/{$route}?access-token='.\$jsonResponse['token'],[
-            'name' => \$name,
-            'description' => \$description,
-        ]);
-        \$I->seeResponseCodeIs(201);
-        \$responseContent = \$I->grabResponse();
-        \$jsonResponse = json_decode(\$responseContent, true);
-        echo 'post=';
-        var_dump(\$jsonResponse);
-
-        
-        \$I->sendGET('/api/{$route}?s[name]='.\$name);
-        \$I->seeResponseCodeIs(200);
-        \$I->seeResponseContainsJson([
-            'name' => \$name,
-        ]);
-        \$I->seeHttpHeader('X-Pagination-Total-Count', '1');
-        \$responseContent = \$I->grabResponse();
-        \$jsonResponse = json_decode(\$responseContent, true);
-        echo 'search=';
-        var_dump(\$jsonResponse);
-    }
-
-}
-TEST_CONTENT;
-        $fileTest = Yii::getAlias('@frontend').'/tests/api/'.$model.'Cest.php';
-        file_put_contents($fileTest,$testContent);
-        echo "$fileTest\n";
     }
 
     private function generateSearch($model)
@@ -505,6 +672,7 @@ class {$model}Controller extends \\yii\\rest\\ActiveController
 
     public function actions(){
         \$actions = parent::actions();
+        unset(\$actions['create']);
         \$actions['index']['prepareDataProvider'] = [\$this,'prepareDataProvider'];
         return \$actions;
     }
@@ -538,7 +706,7 @@ class {$model}Controller extends \\yii\\rest\\ActiveController
     public function checkAccess(\$action, \$model = null, \$params = [])
     {
         if (in_array(\$action,['update','delete'])){
-            if (Yii::\$app->user->can(Rbac::MANAGE_PRODUCT,['product' => \$model])){
+            if (!Yii::\$app->user->can(Rbac::MANAGE_PRODUCT,['product' => \$model])){
                 throw new ForbiddenHttpException('Forbidden');
             }
         }
