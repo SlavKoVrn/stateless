@@ -651,7 +651,17 @@ class {$model}Controller extends \\yii\\rest\\ActiveController
     public function behaviors()
     {
         \$behaviors = parent::behaviors();
-        \$behaviors['cors']['class'] = Cors::class;
+        \$behaviors['corsFilter'] = [
+            'class' => Cors::class,
+            'cors' => [
+                'Origin' => ['*'],
+                'Access-Control-Expose-Headers' => [
+                    'X-Pagination-Per-Page',
+                    'X-Pagination-Total-Count',
+                    'X-Pagination-Page-Count'
+                ],
+            ]
+        ];
         \$behaviors['authenticator']['only'] = ['create', 'update', 'delete'];
         \$behaviors['authenticator']['authMethods'] = [
             HttpBasicAuth::class,
