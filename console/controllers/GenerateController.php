@@ -643,7 +643,7 @@ use yii\\filters\\auth\\HttpBasicAuth;
 use yii\\filters\\auth\\HttpBearerAuth;
 use yii\\web\\ForbiddenHttpException;
 use yii\\web\\ServerErrorHttpException;
-
+use yii\\filters\\Cors;
 class {$model}Controller extends \\yii\\rest\\ActiveController
 {
     public \$modelClass = {$model}::class;
@@ -651,6 +651,7 @@ class {$model}Controller extends \\yii\\rest\\ActiveController
     public function behaviors()
     {
         \$behaviors = parent::behaviors();
+        \$behaviors['cors']['class'] = Cors::class;
         \$behaviors['authenticator']['only'] = ['create', 'update', 'delete'];
         \$behaviors['authenticator']['authMethods'] = [
             HttpBasicAuth::class,

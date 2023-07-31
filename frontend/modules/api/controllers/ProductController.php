@@ -4,11 +4,12 @@ use common\models\Product;
 use common\rbac\Rbac;
 use frontend\modules\api\models\ProductSearch;
 use Yii;
-use yii\helpers\Url;
 use yii\filters\AccessControl;
-use yii\filters\auth\QueryParamAuth;
 use yii\filters\auth\HttpBasicAuth;
 use yii\filters\auth\HttpBearerAuth;
+use yii\filters\auth\QueryParamAuth;
+use yii\filters\Cors;
+use yii\helpers\Url;
 use yii\web\ForbiddenHttpException;
 use yii\web\ServerErrorHttpException;
 
@@ -19,6 +20,7 @@ class ProductController extends \yii\rest\ActiveController
     public function behaviors()
     {
         $behaviors = parent::behaviors();
+        $behaviors['cors']['class'] = Cors::class;
         $behaviors['authenticator']['only'] = ['create', 'update', 'delete'];
         $behaviors['authenticator']['authMethods'] = [
             HttpBasicAuth::class,
