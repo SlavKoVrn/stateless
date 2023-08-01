@@ -1,11 +1,34 @@
 <template>
 <b-overlay :show="loading" rounded="sm">
 
+  <div class="search" v-if="true">
+    <div class="d-flex flex-wrap align-items-center">
+      <div class="mr-2">
+        <b-form-group label="Название">
+          <b-form-input type="search" size="sm" v-model="search.text" tabindex="1" @input="fetchData"></b-form-input>
+        </b-form-group>
+      </div>
+      <div class="align-self-center mt-2 mr-2">
+        <b-button @click="fetchData" class="btn btn-info ml-1">
+          <font-awesome-icon icon="search" class="mr-1" />Поиск
+        </b-button>
+      </div>
+
+      <div class="mt-2 mr-2" v-if="!loading">
+        <p class="m-0" :class="pagination.totalCount === 0 && 'text-danger'">
+          Найдено: {{ pagination.totalCount }}
+        </p>
+      </div>
+
+    </div>
+    <hr>
+  </div>
+
   <b-pagination
-          v-model="pagination.pageNumber"
-          :total-rows="pagination.totalCount"
-          :per-page="pagination.pageSize"
-          @change="loadPage"
+    v-model="pagination.pageNumber"
+    :total-rows="pagination.totalCount"
+    :per-page="pagination.pageSize"
+    @change="loadPage"
   ></b-pagination>
 
   <table class="table table-condensed table-striped">
@@ -25,9 +48,7 @@
         <td>
             {{ item.category.name }}
         </td>
-        <td>
-            {{ item.name }}
-        </td>
+        <td v-html="highlightSubstring(item.name, search.text)"></td>
         <td>
             {{ item.price }}
         </td>
@@ -81,6 +102,11 @@ export default {
     this.fetchData()
   },
   methods: {
+    highlightSubstring(search, glue) {
+        return search.replace(new RegExp(glue, 'gi'), (match) => {
+            return '<strong style="color:red">' + match + '</strong>';
+        });
+    },
     fetchData(page = 1) {
       this.loading = true;
       let productUrl = 'product';
@@ -98,7 +124,7 @@ export default {
         this.pagination.pageSize = parseInt(response.headers['x-pagination-per-page']);
         this.pagination.totalCount = parseInt(response.headers['x-pagination-total-count']);
         this.pagination.pageCount = parseInt(response.headers['x-pagination-page-count']);
-        window.scrollTo(0, 0);
+        //window.scrollTo(0, 0);
       }).catch(error => {
         this.loading = false;
         this.error = error;

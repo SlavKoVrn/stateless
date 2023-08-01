@@ -13,7 +13,6 @@ use yii\widgets\ActiveForm;
 ?>
 <div style="margin-top: 50px"></div>
 <?php $form = ActiveForm::begin(); ?>
-<?= $form->field($model, 'name') ?>
 <?= $form->field($model, 'description') ?>
 <?= $form->field($model, 'category_id')->dropDownList(array_merge([0=>''],Category::getCategories())) ?>
 <?= $form->field($model, 'tags')->dropDownList(Tag::getAllArray(),['multiple' => true]) ?>
@@ -24,7 +23,6 @@ use yii\widgets\ActiveForm;
     'to' => $price_max,
 ]) ?>
 <div class="form-group">
-    <?= Html::submitButton('Поиск', ['id'=>'search_product','class' => 'btn btn-primary']) ?>
     <?= Html::resetButton('Сброс', ['id'=>'search_reset','class' => 'btn btn-outline-secondary']) ?>
 </div>
 <?php ActiveForm::end(); ?>
