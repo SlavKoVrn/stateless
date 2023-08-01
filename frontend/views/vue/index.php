@@ -12,6 +12,7 @@ use yii\widgets\ActiveForm;
 \frontend\assets\VueAssets::register($this);
 ?>
 <div style="margin-top: 50px"></div>
+<?php if (false): ?>
 <?php $form = ActiveForm::begin(); ?>
 <?= $form->field($model, 'description') ?>
 <?= $form->field($model, 'category_id')->dropDownList(array_merge([0=>''],Category::getCategories())) ?>
@@ -26,6 +27,7 @@ use yii\widgets\ActiveForm;
     <?= Html::resetButton('Сброс', ['id'=>'search_reset','class' => 'btn btn-outline-secondary']) ?>
 </div>
 <?php ActiveForm::end(); ?>
+<?php endif; ?>
 
 <div class="container">
     <div id="app"></div>
