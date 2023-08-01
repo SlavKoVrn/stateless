@@ -21,7 +21,7 @@ module.exports = (env, argv) => {
         output: {
             path: PATHS.build,
             filename: config.production ? 'app.min.js' : 'app.js',
-            publicPath: '/frontend/web/'
+            publicPath: '/frontend/web/webpack/'
         },
         module: {
             rules: [

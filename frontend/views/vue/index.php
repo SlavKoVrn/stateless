@@ -9,6 +9,7 @@ use yii\widgets\ActiveForm;
 /** @var yii\web\View $this */
 \common\assets\DataTableAsset::register($this);
 \common\assets\IziToastAsset::register($this);
+\frontend\assets\VueAssets::register($this);
 ?>
 
 <?php $form = ActiveForm::begin(); ?>
@@ -31,4 +32,3 @@ use yii\widgets\ActiveForm;
 <div class="container">
     <div id="app"></div>
 </div>
-<script src="/frontend/web/webpack/app.js"></script>
