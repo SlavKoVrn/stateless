@@ -34,23 +34,34 @@
   <table class="table table-condensed table-striped">
     <thead>
       <tr>
+        <th></th>
         <th><a href="#" alt="Ид">Ид</a></th>
         <th><a href="#" alt="Ид">Категория</a></th>
         <th><a href="#" alt="Название">Название</a></th>
         <th><a href="#" alt="Цена">Цена</a></th>
       </tr>
     </thead>
-    <tbody v-if="!loading">
-      <tr class="" v-for="(item, index) in items">
+    <tbody v-if="!loading" v-for="(item, index) in items">
+      <tr>
+        <td>
+            <button @click="toggleDescription(index)">
+              {{ item.showDescription ? 'Скрыть' : 'Показать' }}
+            </button>
+        </td>
         <td>
             {{ item.id }}
         </td>
         <td>
-            {{ item.category.name }}
+            {{ item.category_name }}
         </td>
         <td v-html="highlightSubstring(item.name, search.text)"></td>
         <td>
             {{ item.price }}
+        </td>
+      </tr>
+      <tr v-if="item.showDescription">
+        <td colspan="5">
+            {{ item.description }}
         </td>
       </tr>
     </tbody>
@@ -102,6 +113,9 @@ export default {
     this.fetchData()
   },
   methods: {
+    toggleDescription(index) {
+      this.items[index].showDescription = !this.items[index].showDescription;
+    },
     highlightSubstring(search, glue) {
         return search.replace(new RegExp(glue, 'gi'), (match) => {
             return '<strong style="color:red">' + match + '</strong>';
@@ -120,7 +134,16 @@ export default {
         params: params,
       }).then(response => {
         this.loading = false;
-        this.items = response.data;
+        this.items = response.data.map(item => {
+          return { 
+            id:item.id, 
+            name:item.name,
+            category_name:item.category.name,
+            price:item.price,
+            description:item.description,
+            showDescription: false
+          };
+        });
         this.pagination.pageSize = parseInt(response.headers['x-pagination-per-page']);
         this.pagination.totalCount = parseInt(response.headers['x-pagination-total-count']);
         this.pagination.pageCount = parseInt(response.headers['x-pagination-page-count']);
