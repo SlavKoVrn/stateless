@@ -11,7 +11,7 @@ use yii\widgets\ActiveForm;
 \common\assets\IziToastAsset::register($this);
 \frontend\assets\VueAssets::register($this);
 ?>
-
+<div style="margin-top: 50px"></div>
 <?php $form = ActiveForm::begin(); ?>
 <?= $form->field($model, 'name') ?>
 <?= $form->field($model, 'description') ?>
