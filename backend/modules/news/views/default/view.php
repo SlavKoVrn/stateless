@@ -39,7 +39,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     return Html::img($model->image,['width' => '250px']);
                 }
             ],
-            'text:ntext',
+            'text:html',
             [
                 'attribute' => 'created_at',
                 'value' => function($model){

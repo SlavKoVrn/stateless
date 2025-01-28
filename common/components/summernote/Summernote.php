@@ -77,7 +77,7 @@ final class Summernote extends InputWidget
     {
         $this->options['id'] = $this->id;
 
-        return Html::textArea($this->name, $this->value, $this->options);
+        return Html::activeTextArea($this->model, $this->attribute, $this->options);
         /*
         return match ($this->hasModel()) {
             true => Html::activeTextArea($this->model, $this->attribute, $this->options),

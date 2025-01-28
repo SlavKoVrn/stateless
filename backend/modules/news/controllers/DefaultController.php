@@ -78,7 +78,7 @@ class DefaultController extends Controller
             $model->load($this->request->post()))
         {
             $model->imageFile = UploadedFile::getInstance($model, 'imageFile');
-            if (is_file($model->imageFile->tempName) and
+            if ($model->imageFile and is_file($model->imageFile->tempName) and
                 $model->validate() and
                 $model->upload() and
                 $model->save(false))
@@ -111,7 +111,7 @@ class DefaultController extends Controller
 
         if ($this->request->isPost and $model->load($this->request->post())) {
             $model->imageFile = UploadedFile::getInstance($model, 'imageFile');
-            if (is_file($model->imageFile->tempName) and
+            if ($model->imageFile and is_file($model->imageFile->tempName) and
                 $model->validate() and
                 $model->upload() and
                 $model->save(false))
