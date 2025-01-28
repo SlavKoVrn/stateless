@@ -43,6 +43,7 @@ AppAsset::register($this);
         $menuItems[] = ['label' => 'Категории', 'url' => ['/category']];
         $menuItems[] = ['label' => 'Тэги', 'url' => ['/tag']];
         $menuItems[] = ['label' => 'Продукты', 'url' => ['/product']];
+        $menuItems[] = ['label' => 'Новости', 'url' => ['/news']];
     }
     echo Nav::widget([
         'options' => ['class' => 'navbar-nav me-auto mb-2 mb-md-0'],
