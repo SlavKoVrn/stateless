@@ -23,7 +23,7 @@ use summernote\Summernote;
             <?php if($model->image): ?>
                 <?= Html::img($model->image,['width' => '250px']) ?>
             <?php endif; ?>
-            <?= $form->field($model, 'imageFile')->fileInput()->label('картинка') ?>
+            <?= $form->field($model, 'imageFile')->fileInput() ?>
         </div>
     </div>
 

@@ -57,6 +57,7 @@ class News extends \yii\db\ActiveRecord
             'text' => 'Текст',
             'created_at' => 'Создано',
             'updated_at' => 'Изменено',
+            'imageFile' => 'Картинка',
         ];
     }
 
