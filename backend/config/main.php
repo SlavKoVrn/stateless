@@ -48,6 +48,7 @@ return [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
+                'news/bulk' => 'news/default/bulk',
             ],
         ],
     ],

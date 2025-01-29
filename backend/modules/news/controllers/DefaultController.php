@@ -4,9 +4,12 @@ namespace backend\modules\news\controllers;
 
 use common\models\News;
 use frontend\modules\news\models\NewsSearch;
+
+use Yii;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\Response;
 
 /**
  * DefaultController implements the CRUD actions for News model.
@@ -29,6 +32,32 @@ class DefaultController extends Controller
                 ],
             ]
         );
+    }
+
+    /**
+     * Bulk deletes of array News model.
+     * @return bool true - deleted, false - not deleted
+     */
+    public function actionBulk()
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $ids = Yii::$app->request->post('ids');
+
+        if (count($ids)){
+            $transaction = \Yii::$app->db->beginTransaction();
+            try {
+                News::deleteAll(['in', 'id', $ids]);
+                $transaction->commit();
+                return ['deleted' => true];
+            } catch (\Exception $e) {
+                $transaction->rollBack();
+                return ['deleted' => false];
+            } catch (\Throwable $e) {
+                $transaction->rollBack();
+                return ['deleted' => false];
+            }
+        }
+        return ['deleted' => false];
     }
 
     /**
