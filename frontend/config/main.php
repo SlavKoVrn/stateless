@@ -8,15 +8,18 @@ $params = array_merge(
 
 return [
     'id' => 'app-frontend',
-    'name' => 'Stateless',
+    'name' => 'ProГород Киров',
     'language' => 'ru-RU',
-    'defaultRoute' => 'product',
+    'defaultRoute' => 'news',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
     'controllerNamespace' => 'frontend\controllers',
     'modules' => [
         'api' => [
             'class' => 'frontend\modules\api\Module',
+        ],
+        'news' => [
+            'class' => 'frontend\modules\news\Module',
         ],
     ],
     'components' => [
@@ -68,6 +71,13 @@ return [
                     'class'=>\yii\rest\UrlRule::class,
                     'pluralize'=>false,
                     'controller' => ['api/good'],
+                ],
+                'news' => 'news/default/index',
+                [
+                    'class' => \yii\web\UrlRule::class,
+                    'pattern' => 'news/<slug>',
+                    'route' => 'news/default/view',
+                    'defaults' => ['slug' => null]
                 ],
             ],
         ],

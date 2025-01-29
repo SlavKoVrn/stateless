@@ -3,15 +3,10 @@
 namespace backend\modules\news\controllers;
 
 use common\models\News;
-use common\models\NewsSearch;
-
-use Yii;
+use frontend\modules\news\models\NewsSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
-use yii\web\HttpException;
 use yii\filters\VerbFilter;
-use yii\web\UploadedFile;
-use yii\helpers\FileHelper;
 
 /**
  * DefaultController implements the CRUD actions for News model.
@@ -74,20 +69,9 @@ class DefaultController extends Controller
     {
         $model = new News();
 
-        if ($this->request->isPost and
-            $model->load($this->request->post()))
-        {
-            $model->imageFile = UploadedFile::getInstance($model, 'imageFile');
-            if ($model->imageFile and is_file($model->imageFile->tempName) and
-                $model->validate() and
-                $model->upload() and
-                $model->save(false))
-            {
+        if ($this->request->isPost) {
+            if ($model->load($this->request->post()) && $model->save()) {
                 return $this->redirect(['view', 'id' => $model->id]);
-            }else{
-                if ($model->save()){
-                    return $this->redirect(['view', 'id' => $model->id]);
-                }
             }
         } else {
             $model->loadDefaultValues();
@@ -109,19 +93,8 @@ class DefaultController extends Controller
     {
         $model = $this->findModel($id);
 
-        if ($this->request->isPost and $model->load($this->request->post())) {
-            $model->imageFile = UploadedFile::getInstance($model, 'imageFile');
-            if ($model->imageFile and is_file($model->imageFile->tempName) and
-                $model->validate() and
-                $model->upload() and
-                $model->save(false))
-            {
-                return $this->redirect(['view', 'id' => $model->id]);
-            }else{
-                if ($model->save()){
-                    return $this->redirect(['view', 'id' => $model->id]);
-                }
-            }
+        if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
+            return $this->redirect(['view', 'id' => $model->id]);
         }
 
         return $this->render('update', [
