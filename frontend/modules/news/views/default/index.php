@@ -26,20 +26,20 @@ $this->params['breadcrumbs'][] = $this->title;
             'summary' => false,
             'options' => [ 'class' => 'row'],
             'dataProvider' => $dataProvider,
-            'itemOptions' => ['class' => 'col-lg-4 col-md-6'],
+            'itemOptions' => ['class' => 'col-sm-12 col-md-4'],
             'itemView' => function ($model, $key, $index, $widget) {
                 return $this->render('item',['model'=>$model]);
             },
             'pager' => false,
         ]) ?>
 
-    </div>
+        <?= NewsLinkPager::widget([
+            'pagination' => $dataProvider->pagination,
+            'prevPageLabel' => '<<',
+            'nextPageLabel' => '>>',
+        ]) ?>
 
-    <?= NewsLinkPager::widget([
-        'pagination' => $dataProvider->pagination,
-        'prevPageLabel' => '<i class="bi bi-chevron-left"></i>',
-        'nextPageLabel' => '<i class="bi bi-chevron-right"></i>',
-    ]) ?>
+    </div>
 
     <?php Pjax::end(); ?>
 

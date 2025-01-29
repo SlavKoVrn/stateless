@@ -43,3 +43,11 @@ use summernote\Summernote;
     <?php ActiveForm::end(); ?>
 
 </div>
+
+<?php
+$css=<<<CSS
+div.help-block {
+    color:red;
+}
+CSS;
+$this->registerCSS($css);
