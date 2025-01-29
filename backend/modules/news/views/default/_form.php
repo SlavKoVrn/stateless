@@ -27,6 +27,17 @@ use summernote\Summernote;
         </div>
     </div>
 
+    <?php if (!$model->isNewRecord) : ?>
+        <div class="row">
+            <div class="col-sm-6">
+                <?= $form->field($model, 'created')->textInput(['readonly' => true]) ?>
+            </div>
+            <div class="col-sm-6">
+                <?= $form->field($model, 'updated')->textInput(['readonly' => true]) ?>
+            </div>
+        </div>
+    <?php endif; ?>
+
     <?= $form->field($model, 'text')->widget(Summernote::class, [
         'config' => [
             'focus' => true,

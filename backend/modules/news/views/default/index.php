@@ -26,7 +26,17 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            'title',
+            [
+                'attribute' => 'title',
+                'format' => 'raw',
+                'filter' => false,
+                'value' => function($model){
+                    return Html::a($model->title,'/news/'.$model->slug,[
+                        'target' => '_blank',
+                        'data-pjax' => 0,
+                    ]);
+                }
+            ],
             [
                 'attribute' => 'image',
                 'format' => 'raw',

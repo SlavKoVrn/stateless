@@ -30,8 +30,16 @@ $this->params['breadcrumbs'][] = $this->title;
         'model' => $model,
         'attributes' => [
             'id',
-            'title',
-            'slug',
+            [
+                'attribute' => 'title',
+                'format' => 'raw',
+                'filter' => false,
+                'value' => function($model){
+                    return Html::a($model->title,'/news/'.$model->slug,[
+                        'target' => '_blank',
+                    ]);
+                }
+            ],
             [
                 'attribute' => 'image',
                 'format' => 'raw',

@@ -20,7 +20,7 @@ use yii\helpers\FileHelper;
  */
 class News extends \yii\db\ActiveRecord
 {
-    public $imageFile;
+    public $imageFile, $created, $updated;
 
     /**
      * {@inheritdoc}
@@ -58,6 +58,8 @@ class News extends \yii\db\ActiveRecord
             'created_at' => 'Создано',
             'updated_at' => 'Изменено',
             'imageFile' => 'Картинка',
+            'created' => 'Создано',
+            'updated' => 'Изменено',
         ];
     }
 
@@ -75,6 +77,13 @@ class News extends \yii\db\ActiveRecord
                 'value' => new \yii\db\Expression('NOW()'),
             ],
         ];
+    }
+
+    public function afterFind()
+    {
+        parent::afterFind();
+        $this->created = date('d.m.Y H:i', strtotime($this->created_at));
+        $this->updated = date('d.m.Y H:i', strtotime($this->updated_at));
     }
 
     public function upload()

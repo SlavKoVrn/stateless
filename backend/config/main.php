@@ -12,6 +12,7 @@ return [
     'basePath' => dirname(__DIR__),
     'controllerNamespace' => 'backend\controllers',
     'bootstrap' => ['log'],
+    'defaultRoute' => 'news',
     'modules' => [
         'news' => [
             'class' => 'backend\modules\news\Module',
